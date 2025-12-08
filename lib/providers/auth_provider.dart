@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import '../models/user.dart';
+import '../models/siswa.dart'; // Import Siswa model
+import '../models/guru.dart'; // Import Guru model
 
 class AuthProvider with ChangeNotifier {
   String? _currentRole;
@@ -11,24 +15,31 @@ class AuthProvider with ChangeNotifier {
 
   bool get isLoggedIn => _currentRole != null;
 
-  // Dummy credentials
-  final Map<String, Map<String, String>> _credentials = {
-    'admin': {'password': 'admin123', 'role': 'Admin', 'id': 'admin'},
-    'guru': {'password': 'guru123', 'role': 'Guru', 'id': '198501012010011001'},
-    'Ahmad Rizki': {'password': 'siswa123', 'role': 'Siswa', 'id': '2024001'},
-    'Siti Nurhaliza': {'password': 'siswa123', 'role': 'Siswa', 'id': '2024002'},
-    'Abbiyi QS': {'password': 'siswa123', 'role': 'Siswa', 'id': '2024003'},
-  };
+  Future<bool> login(String username, String password) async {
+    final userBox = Hive.box<User>('users');
+    final user = userBox.values.firstWhere(
+      (user) => user.username == username,orElse: () => User(username: '', password: '', role: '')
+    );
 
-  bool login(String username, String password) {
-    if (_credentials.containsKey(username)) {
-      if (_credentials[username]!['password'] == password) {
-        _currentUsername = username;
-        _currentRole = _credentials[username]!['role'];
-        _currentUserId = _credentials[username]!['id'];
-        notifyListeners();
-        return true;
+    if (user.username.isNotEmpty && user.password == password) {
+      _currentUsername = user.username;
+      _currentRole = user.role;
+      
+      // Set _currentUserId based on role or type of username used
+      if (user.role == 'Siswa') {
+        // Assuming username is nama in the dummy data, let's find by nama
+        final siswaBox = Hive.box<Siswa>('siswa');
+        _currentUserId = siswaBox.values.firstWhere((Siswa s) => s.nama == username, orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: '')).nis; // Explicitly type s as Siswa
+      } else if (user.role == 'Guru') {
+        // Similar logic for Guru NIP
+        final guruBox = Hive.box<Guru>('guru');
+        _currentUserId = guruBox.values.firstWhere((Guru g) => g.nama == username, orElse: () => Guru(nip: '', nama: '', mataPelajaran: '')).nip; // Explicitly type g as Guru
+      } else if (user.role == 'Admin') {
+        _currentUserId = 'admin'; // Or a dedicated admin ID
       }
+      
+      notifyListeners();
+      return true;
     }
     return false;
   }

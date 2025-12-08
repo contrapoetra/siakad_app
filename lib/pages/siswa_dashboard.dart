@@ -9,6 +9,7 @@ import '../widgets/empty_state.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:fl_chart/fl_chart.dart'; // Added for student grade charts
 
 class SiswaDashboard extends StatefulWidget {
   const SiswaDashboard({super.key});
@@ -245,63 +246,186 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
             ],
           ),
         ),
-        Expanded(
-          child: nilaiList.isEmpty
-              ? const EmptyState(
-                  icon: Icons.grade,
-                  message: 'Belum ada nilai',
-                )
-              : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: DataTable(
-                        columns: const [
-                          DataColumn(label: Text('Mata Pelajaran')),
-                          DataColumn(label: Text('Tugas')),
-                          DataColumn(label: Text('UTS')),
-                          DataColumn(label: Text('UAS')),
-                          DataColumn(label: Text('Nilai Akhir')),
-                          DataColumn(label: Text('Predikat')),
-                        ],
-                        rows: nilaiList.map((nilai) {
-                          return DataRow(
-                            cells: [
-                              DataCell(Text(nilai.mataPelajaran)),
-                              DataCell(Text(nilai.nilaiTugas.toStringAsFixed(1))),
-                              DataCell(Text(nilai.nilaiUTS.toStringAsFixed(1))),
-                              DataCell(Text(nilai.nilaiUAS.toStringAsFixed(1))),
-                              DataCell(Text(nilai.nilaiAkhir.toStringAsFixed(2))),
-                              DataCell(
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _getPredikatColor(nilai.predikat),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    nilai.predikat,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+        // Grade Chart Section
+        nilaiList.isNotEmpty
+            ? Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Grafik Nilai Akhir',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 200,
+                          child: BarChart(
+                            BarChartData(
+                              barGroups: _getBarChartData(nilaiList),
+                              gridData: const FlGridData(show: false),
+                              borderData: FlBorderData(
+                                show: true,
+                                border: Border.all(color: Colors.grey.withOpacity(0.5), width: 1),
+                              ),
+                              titlesData: FlTitlesData(
+                                show: true,
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    getTitlesWidget: (value, meta) {
+                                      final index = value.toInt();
+                                      if (index >= 0 && index < nilaiList.length) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 8.0),
+                                          child: Text(
+                                            nilaiList[index].mataPelajaran,
+                                            style: const TextStyle(fontSize: 10),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        );
+                                      }
+                                      return const Text('');
+                                    },
+                                    interval: 1,
                                   ),
                                 ),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 40,
+                                    getTitlesWidget: (value, meta) {
+                                      return Text(
+                                        value.toInt().toString(),
+                                        style: const TextStyle(fontSize: 10),
+                                      );
+                                    },
+                                    interval: 20,
+                                  ),
+                                ),
+                                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                               ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
+                              barTouchData: BarTouchData(
+                                enabled: true,
+                                touchTooltipData: BarTouchTooltipData(
+                                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                    return BarTooltipItem(
+                                      '${nilaiList[group.x.toInt()].mataPelajaran}\n',
+                                      const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                      children: <TextSpan>[
+                                        TextSpan(
+                                          text: rod.toY.toStringAsFixed(2),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                  tooltipPadding: const EdgeInsets.all(8), // Add padding for better look
+                                  tooltipBorder: BorderSide(color: Theme.of(context).colorScheme.primary), // Add a border
+                                  tooltipRoundedRadius: 8, // Rounded corners for tooltip
+                                ),
+                              ),
+                              maxY: 100,
+                              minY: 0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+              )
+            : const SizedBox.shrink(), // Hide chart if no data
+
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Mata Pelajaran')),
+                    DataColumn(label: Text('Tugas')),
+                    DataColumn(label: Text('UTS')),
+                    DataColumn(label: Text('UAS')),
+                    DataColumn(label: Text('Nilai Akhir')),
+                    DataColumn(label: Text('Predikat')),
+                  ],
+                  rows: nilaiList.map((nilai) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(nilai.mataPelajaran)),
+                        DataCell(Text(nilai.nilaiTugas.toStringAsFixed(1))),
+                        DataCell(Text(nilai.nilaiUTS.toStringAsFixed(1))),
+                        DataCell(Text(nilai.nilaiUAS.toStringAsFixed(1))),
+                        DataCell(Text(nilai.nilaiAkhir.toStringAsFixed(2))),
+                        DataCell(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getPredikatColor(nilai.predikat),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              nilai.predikat,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );
+  }
+
+  List<BarChartGroupData> _getBarChartData(List<dynamic> nilaiList) {
+    return List.generate(nilaiList.length, (i) {
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: nilaiList[i].nilaiAkhir,
+            color: Theme.of(context).colorScheme.primary,
+            width: 16,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(6),
+            ),
+          ),
+        ],
+        showingTooltipIndicators: [0],
+      );
+    });
   }
 
   Widget _buildPengumumanTab() {

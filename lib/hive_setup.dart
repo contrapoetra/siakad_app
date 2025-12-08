@@ -4,24 +4,28 @@ import 'models/guru.dart';
 import 'models/jadwal.dart';
 import 'models/nilai.dart';
 import 'models/pengumuman.dart';
+import 'models/user.dart';
 
 Future<void> initHive() async {
   await Hive.initFlutter();
-  
+  await Hive.deleteFromDisk(); // !!! TEMPORARY: Clear all Hive data to resolve TypeAdapter conflicts !!!
+
   // Register Adapters
   Hive.registerAdapter(SiswaAdapter());
   Hive.registerAdapter(GuruAdapter());
   Hive.registerAdapter(JadwalAdapter());
   Hive.registerAdapter(NilaiAdapter());
   Hive.registerAdapter(PengumumanAdapter());
-  
+  Hive.registerAdapter(UserAdapter());
+
   // Open Boxes
   await Hive.openBox<Siswa>('siswa');
   await Hive.openBox<Guru>('guru');
   await Hive.openBox<Jadwal>('jadwal');
   await Hive.openBox<Nilai>('nilai');
   await Hive.openBox<Pengumuman>('pengumuman');
-  
+  await Hive.openBox<User>('users'); // Open the users box
+
   // Initialize dummy data
   await _initializeDummyData();
 }
@@ -31,7 +35,8 @@ Future<void> _initializeDummyData() async {
   final guruBox = Hive.box<Guru>('guru');
   final jadwalBox = Hive.box<Jadwal>('jadwal');
   final pengumumanBox = Hive.box<Pengumuman>('pengumuman');
-  
+  final userBox = Hive.box<User>('users'); // Get the users box
+
   // Add dummy siswa if empty
   if (siswaBox.isEmpty) {
     await siswaBox.add(Siswa(
@@ -46,8 +51,14 @@ Future<void> _initializeDummyData() async {
       kelas: 'XII',
       jurusan: 'IPS',
     ));
+    await siswaBox.add(Siswa(
+      nis: '2024003',
+      nama: 'Abbiyi QS',
+      kelas: 'XII',
+      jurusan: 'IPA',
+    ));
   }
-  
+
   // Add dummy guru if empty
   if (guruBox.isEmpty) {
     await guruBox.add(Guru(
@@ -66,7 +77,7 @@ Future<void> _initializeDummyData() async {
       mataPelajaran: 'Fisika',
     ));
   }
-  
+
   // Add dummy jadwal if empty
   if (jadwalBox.isEmpty) {
     await jadwalBox.add(Jadwal(
@@ -91,7 +102,7 @@ Future<void> _initializeDummyData() async {
       kelas: 'XII IPA',
     ));
   }
-  
+
   // Add dummy pengumuman if empty
   if (pengumumanBox.isEmpty) {
     await pengumumanBox.add(Pengumuman(
@@ -104,5 +115,16 @@ Future<void> _initializeDummyData() async {
       isi: 'UTS akan dilaksanakan pada tanggal 1-5 Desember 2025. Harap mempersiapkan diri dengan baik.',
       tanggal: DateTime.now(),
     ));
+  }
+
+  // Add dummy users if empty
+  if (userBox.isEmpty) {
+    await userBox.add(User(username: 'admin', password: 'admin123', role: 'Admin'));
+    await userBox.add(User(username: 'guru', password: 'guru123', role: 'Guru'));
+    // Use NIS for siswa username for consistency, or nama if that's what's expected for login
+    // For now, using nama as it's in the current AuthProvider
+    await userBox.add(User(username: 'Ahmad Rizki', password: 'siswa123', role: 'Siswa'));
+    await userBox.add(User(username: 'Siti Nurhaliza', password: 'siswa123', role: 'Siswa'));
+    await userBox.add(User(username: 'Abbiyi QS', password: 'siswa123', role: 'Siswa'));
   }
 }

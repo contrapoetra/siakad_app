@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/pengumuman.dart';
 import '../services/pengumuman_service.dart';
+import '../services/notification_service.dart'; // Import NotificationService
 
 class PengumumanProvider with ChangeNotifier {
   final PengumumanService _service = PengumumanService();
@@ -16,6 +17,13 @@ class PengumumanProvider with ChangeNotifier {
   Future<void> addPengumuman(Pengumuman pengumuman) async {
     await _service.addPengumuman(pengumuman);
     loadPengumuman();
+    // Trigger local notification for new announcement
+    NotificationService().showNotification(
+      pengumuman.key ?? DateTime.now().millisecondsSinceEpoch, // Use key as ID or a unique timestamp
+      'Pengumuman Baru: ${pengumuman.judul}',
+      pengumuman.isi,
+      'announcement_payload',
+    );
   }
 
   Future<void> updatePengumuman(int index, Pengumuman pengumuman) async {

@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = authProvider.login(
+      final success = await authProvider.login(
         _usernameController.text,
         _passwordController.text,
       );
@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blue[700]!, Colors.blue[900]!],
+            colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.darken(0.2)],
           ),
         ),
         child: SafeArea(
@@ -90,14 +90,14 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.school, size: 80, color: Colors.blue[700]),
+                        Icon(Icons.school, size: 80, color: Theme.of(context).colorScheme.primary),
                         const SizedBox(height: 16),
                         Text(
                           'SIAKAD SEKOLAH',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[700],
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                           'Sistem Informasi Akademik',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -142,10 +142,25 @@ class _LoginPageState extends State<LoginPage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue[50],
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Column(children: [                        
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Dummy Login Credentials:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Admin: admin / admin123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                              Text('Guru: guru / guru123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                              Text('Siswa: Ahmad Rizki / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                              Text('Siswa: Siti Nurhaliza / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                              Text('Siswa: Abbiyi QS / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                             ],
                           ),
                         ),
@@ -161,3 +176,13 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+extension ColorExtension on Color {
+  Color darken([double amount = .1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(this);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
+  }
+}
+
