@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/pengumuman.dart';
@@ -30,14 +31,24 @@ class _PengumumanPageState extends State<PengumumanPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(pengumuman == null ? 'Tambah Pengumuman' : 'Edit Pengumuman'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
+          ),
+          Center(
+            child: AlertDialog(
+              title: Text(pengumuman == null ? 'Tambah Pengumuman' : 'Edit Pengumuman'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                 CustomInput(
                   label: 'Judul',
                   controller: judulController,
@@ -63,43 +74,46 @@ class _PengumumanPageState extends State<PengumumanPage> {
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (formKey.currentState!.validate()) {
-                final provider = Provider.of<PengumumanProvider>(context, listen: false);
-                final newPengumuman = Pengumuman(
-                  judul: judulController.text,
-                  isi: isiController.text,
-                  tanggal: pengumuman?.tanggal ?? DateTime.now(),
-                );
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      final provider = Provider.of<PengumumanProvider>(context, listen: false);
+                      final newPengumuman = Pengumuman(
+                        judul: judulController.text,
+                        isi: isiController.text,
+                        tanggal: pengumuman?.tanggal ?? DateTime.now(),
+                      );
 
-                if (index == null) {
-                  await provider.addPengumuman(newPengumuman);
-                } else {
-                  await provider.updatePengumuman(index, newPengumuman);
-                }
+                      if (index == null) {
+                        await provider.addPengumuman(newPengumuman);
+                      } else {
+                        await provider.updatePengumuman(index, newPengumuman);
+                      }
 
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        pengumuman == null
-                            ? 'Pengumuman berhasil ditambahkan'
-                            : 'Pengumuman berhasil diupdate',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Simpan'),
+                      if (mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              pengumuman == null
+                                  ? 'Pengumuman berhasil ditambahkan'
+                                  : 'Pengumuman berhasil diupdate',
+                            ),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Simpan'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -109,30 +123,43 @@ class _PengumumanPageState extends State<PengumumanPage> {
   void _confirmDelete(int index, String judul) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: Text('Apakah Anda yakin ingin menghapus pengumuman "$judul"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final provider = Provider.of<PengumumanProvider>(context, listen: false);
-              await provider.deletePengumuman(index);
-              if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Pengumuman berhasil dihapus'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Hapus'),
+          Center(
+            child: AlertDialog(
+              title: const Text('Konfirmasi Hapus'),
+              content: Text('Apakah Anda yakin ingin menghapus pengumuman "$judul"?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final provider = Provider.of<PengumumanProvider>(context, listen: false);
+                    await provider.deletePengumuman(index);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Pengumuman berhasil dihapus'),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  child: const Text('Hapus'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -142,29 +169,42 @@ class _PengumumanPageState extends State<PengumumanPage> {
   void _showDetailDialog(Pengumuman pengumuman) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(pengumuman.judul),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                DateFormat('dd MMMM yyyy, HH:mm').format(pengumuman.tanggal),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
+          ),
+          Center(
+            child: AlertDialog(
+              title: Text(pengumuman.judul),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      DateFormat('dd MMMM yyyy, HH:mm').format(pengumuman.tanggal),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(pengumuman.isi),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(pengumuman.isi),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Tutup'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -194,14 +234,17 @@ class _PengumumanPageState extends State<PengumumanPage> {
               itemBuilder: (context, index) {
                 final pengumuman = provider.pengumumanList[index];
                 return Card(
-                  elevation: 2,
+                  elevation: 0,
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.purple[700],
-                      child: const Icon(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      color: Theme.of(context).primaryColor,
+                      child: Icon(
                         Icons.announcement,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                     title: Text(
@@ -216,13 +259,16 @@ class _PengumumanPageState extends State<PengumumanPage> {
                           pengumuman.isi.length > 60
                               ? '${pengumuman.isi.substring(0, 60)}...'
                               : pengumuman.isi,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           DateFormat('dd MMM yyyy').format(pengumuman.tanggal),
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                           ),
                         ),
                       ],

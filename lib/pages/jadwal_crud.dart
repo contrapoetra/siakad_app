@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../models/jadwal.dart';
 import '../providers/jadwal_provider.dart';
@@ -31,14 +32,24 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(jadwal == null ? 'Tambah Jadwal' : 'Edit Jadwal'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
+          ),
+          Center(
+            child: AlertDialog(
+              title: Text(jadwal == null ? 'Tambah Jadwal' : 'Edit Jadwal'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                 CustomInput(
                   label: 'Hari',
                   controller: hariController,
@@ -93,45 +104,48 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (formKey.currentState!.validate()) {
-                final provider = Provider.of<JadwalProvider>(context, listen: false);
-                final newJadwal = Jadwal(
-                  hari: hariController.text,
-                  jam: jamController.text,
-                  mataPelajaran: mataPelajaranController.text,
-                  guruPengampu: guruPengampuController.text,
-                  kelas: kelasController.text,
-                );
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      final provider = Provider.of<JadwalProvider>(context, listen: false);
+                      final newJadwal = Jadwal(
+                        hari: hariController.text,
+                        jam: jamController.text,
+                        mataPelajaran: mataPelajaranController.text,
+                        guruPengampu: guruPengampuController.text,
+                        kelas: kelasController.text,
+                      );
 
-                if (index == null) {
-                  await provider.addJadwal(newJadwal);
-                } else {
-                  await provider.updateJadwal(index, newJadwal);
-                }
+                      if (index == null) {
+                        await provider.addJadwal(newJadwal);
+                      } else {
+                        await provider.updateJadwal(index, newJadwal);
+                      }
 
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        jadwal == null
-                            ? 'Jadwal berhasil ditambahkan'
-                            : 'Jadwal berhasil diupdate',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Simpan'),
+                      if (mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              jadwal == null
+                                  ? 'Jadwal berhasil ditambahkan'
+                                  : 'Jadwal berhasil diupdate',
+                            ),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Simpan'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -141,30 +155,43 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
   void _confirmDelete(int index, String mataPelajaran) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: Text('Apakah Anda yakin ingin menghapus jadwal $mataPelajaran?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final provider = Provider.of<JadwalProvider>(context, listen: false);
-              await provider.deleteJadwal(index);
-              if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Jadwal berhasil dihapus'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Hapus'),
+          Center(
+            child: AlertDialog(
+              title: const Text('Konfirmasi Hapus'),
+              content: Text('Apakah Anda yakin ingin menghapus jadwal $mataPelajaran?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final provider = Provider.of<JadwalProvider>(context, listen: false);
+                    await provider.deleteJadwal(index);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Jadwal berhasil dihapus'),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  child: const Text('Hapus'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -192,11 +219,14 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
               itemBuilder: (context, index) {
                 final jadwal = provider.jadwalList[index];
                 return Card(
-                  elevation: 2,
+                  elevation: 0,
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.orange[700],
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      color: Theme.of(context).primaryColor,
                       child: Text(
                         jadwal.hari.substring(0, 1),
                         style: const TextStyle(color: Colors.white),

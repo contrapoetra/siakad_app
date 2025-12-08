@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'hive_setup.dart';
 import 'routes.dart';
 import 'providers/auth_provider.dart';
@@ -8,6 +9,7 @@ import 'providers/guru_provider.dart';
 import 'providers/jadwal_provider.dart';
 import 'providers/nilai_provider.dart';
 import 'providers/pengumuman_provider.dart';
+import 'providers/theme_provider.dart';
 import 'services/notification_service.dart'; // Import NotificationService
 
 void main() async {
@@ -30,185 +32,340 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => JadwalProvider()),
         ChangeNotifierProvider(create: (_) => NilaiProvider()),
         ChangeNotifierProvider(create: (_) => PengumumanProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: 'SIAKAD XYZ',
-        theme: ThemeData(
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'SIAKAD XYZ',
+            themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF2D5A27),
+            seedColor: Colors.black,
             brightness: Brightness.light,
-            primary: const Color(0xFF2D5A27), // Forest Green
-            secondary: const Color(0xFF8B7355), // Khaki Brown
-            tertiary: const Color(0xFF4A7C59), // Sage Green
-            surface: const Color(0xFFF5F1E6), // Cream
-            background: const Color(0xFFF9F7F0), // Light Cream
+            primary: Colors.black,
+            secondary: Colors.black,
+            tertiary: Colors.grey.shade800,
+            surface: Colors.white,
+            background: Colors.white,
             onPrimary: Colors.white,
             onSecondary: Colors.white,
+            onSurface: Colors.black,
+            error: Colors.red.shade700,
           ),
-          useMaterial3: true,
-          fontFamily: 'Poppins',
+          useMaterial3: false,
+          textTheme: GoogleFonts.montserratTextTheme(),
+          scaffoldBackgroundColor: Colors.white,
           appBarTheme: AppBarTheme(
-            backgroundColor: const Color(0xFF2D5A27),
-            foregroundColor: Colors.white,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
             elevation: 0,
             centerTitle: false,
-            titleTextStyle: const TextStyle(
+            titleTextStyle: GoogleFonts.montserrat(
               fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+              letterSpacing: 0.5,
             ),
             surfaceTintColor: Colors.transparent,
-            iconTheme: const IconThemeData(color: Colors.white),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(20),
-              ),
-            ),
+            iconTheme: const IconThemeData(color: Colors.black),
+            shape: const Border(bottom: BorderSide(color: Colors.black, width: 1)),
           ),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF8B7355)),
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.black, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF8B7355)),
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.black, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2D5A27), width: 2),
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.black, width: 1),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 16,
+              vertical: 20,
             ),
-            labelStyle: const TextStyle(
-              color: Color(0xFF2D5A27),
-              fontWeight: FontWeight.w500,
+            labelStyle: GoogleFonts.montserrat(
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
             ),
-            hintStyle: TextStyle(
-              color: const Color(0xFF2D5A27).withOpacity(0.6),
+            hintStyle: GoogleFonts.montserrat(
+              color: Colors.black54,
             ),
-            prefixIconColor: const Color(0xFF2D5A27),
-            suffixIconColor: const Color(0xFF2D5A27),
+            prefixIconColor: Colors.black,
+            suffixIconColor: Colors.black,
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D5A27),
+              backgroundColor: Colors.black,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(color: Colors.black, width: 1),
               ),
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.w600,
+              textStyle: GoogleFonts.montserrat(
+                fontWeight: FontWeight.bold,
                 fontSize: 16,
-                fontFamily: 'Poppins',
+                letterSpacing: 1.0,
               ),
-              elevation: 3,
-              shadowColor: const Color(0xFF2D5A27).withOpacity(0.3),
+              elevation: 0,
             ),
           ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF4A7C59),
-              textStyle: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Poppins',
+              foregroundColor: Colors.black,
+              textStyle: GoogleFonts.montserrat(
+                fontWeight: FontWeight.w700,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             ),
           ),
           chipTheme: ChipThemeData(
-            backgroundColor: const Color(0xFFE8E2D1),
-            selectedColor: const Color(0xFF4A7C59),
-            labelStyle: const TextStyle(color: Color(0xFF2D5A27)),
-            secondaryLabelStyle: const TextStyle(color: Colors.white),
+            backgroundColor: Colors.grey.shade200,
+            selectedColor: Colors.black,
+            labelStyle: GoogleFonts.montserrat(color: Colors.white, fontWeight: FontWeight.bold),
+            secondaryLabelStyle: GoogleFonts.montserrat(color: Colors.white),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black, width: 1),
             ),
-            side: BorderSide.none,
             checkmarkColor: Colors.white,
           ),
           listTileTheme: ListTileThemeData(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            shape: const Border(
+              bottom: BorderSide(color: Colors.black, width: 1),
             ),
-            tileColor: const Color(0xFFF5F1E6),
+            tileColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 8,
+              vertical: 12,
             ),
-            iconColor: const Color(0xFF2D5A27),
+            iconColor: Colors.black,
+            textColor: Colors.black,
           ),
           bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            backgroundColor: const Color(0xFFF5F1E6),
-            selectedItemColor: const Color(0xFF2D5A27),
-            unselectedItemColor: const Color(0xFF8B7355),
-            elevation: 8,
+            backgroundColor: Colors.white,
+            selectedItemColor: Colors.black,
+            unselectedItemColor: Colors.grey.shade600,
+            elevation: 0,
             type: BottomNavigationBarType.fixed,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+            selectedLabelStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w800),
             landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
           ),
-          floatingActionButtonTheme: const FloatingActionButtonThemeData(
-            backgroundColor: Color(0xFF4A7C59),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: Colors.black,
             foregroundColor: Colors.white,
-            shape: CircleBorder(),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black, width: 1),
+            ),
+            elevation: 0,
           ),
-          dividerTheme: DividerThemeData(
-            color: const Color(0xFF8B7355).withOpacity(0.3),
+          cardTheme: CardThemeData(
+            color: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black, width: 1),
+            ),
+            margin: const EdgeInsets.all(8),
+          ),
+          dialogTheme: DialogThemeData(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black, width: 1),
+            ),
+          ),
+          dividerTheme: const DividerThemeData(
+            color: Colors.black,
             thickness: 1,
-            space: 20,
+            space: 24,
           ),
           progressIndicatorTheme: const ProgressIndicatorThemeData(
-            color: Color(0xFF4A7C59),
-            linearTrackColor: Color(0xFFE8E2D1),
+            color: Colors.black,
+            linearTrackColor: Colors.grey,
           ),
           snackBarTheme: SnackBarThemeData(
-            backgroundColor: const Color(0xFF2D5A27),
-            contentTextStyle: const TextStyle(color: Colors.white),
+            backgroundColor: Colors.black,
+            contentTextStyle: GoogleFonts.montserrat(color: Colors.white, fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.black, width: 1),
             ),
             behavior: SnackBarBehavior.floating,
+            elevation: 0,
           ),
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF4A7C59),
+            seedColor: Colors.white,
             brightness: Brightness.dark,
-            primary: const Color(0xFF4A7C59), // Darker Sage Green
-            secondary: const Color(0xFFA99276), // Lighter Brown
-            tertiary: const Color(0xFF3A5A40), // Deep Forest Green
-            surface: const Color(0xFF2C3E2B), // Dark Earth
-            background: const Color(0xFF1E281E), // Darker Earth
+            primary: Colors.white,
+            secondary: Colors.white,
+            tertiary: Colors.grey.shade200,
+            surface: Colors.black,
+            background: Colors.black,
+            onPrimary: Colors.black,
+            onSecondary: Colors.black,
+            onSurface: Colors.white,
+            error: Colors.red.shade400,
           ),
-          useMaterial3: true,
-          fontFamily: 'Poppins',
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF2C3E2B),
+          useMaterial3: false,
+          textTheme: GoogleFonts.montserratTextTheme(ThemeData.dark().textTheme),
+          scaffoldBackgroundColor: Colors.black,
+          iconTheme: const IconThemeData(color: Colors.white),
+          listTileTheme: ListTileThemeData(
+            iconColor: Colors.white,
+            textColor: Colors.white,
+            tileColor: Colors.grey.shade900,
+            shape: const Border(
+              bottom: BorderSide(color: Colors.white, width: 1),
+            ),
+          ),
+          appBarTheme: AppBarTheme(
+            backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             elevation: 0,
-            surfaceTintColor: Colors.transparent,
+            shape: const Border(bottom: BorderSide(color: Colors.white, width: 1)),
+            titleTextStyle: GoogleFonts.montserrat(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+          cardTheme: CardThemeData(
+            color: Colors.grey.shade900,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(20),
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.white, width: 1),
+            ),
+            margin: const EdgeInsets.all(8),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(color: Colors.white, width: 1),
               ),
+              textStyle: GoogleFonts.montserrat(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                letterSpacing: 1.0,
+              ),
+              elevation: 0,
+            ),
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              textStyle: GoogleFonts.montserrat(
+                fontWeight: FontWeight.w700,
+              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            ),
+          ),
+          chipTheme: ChipThemeData(
+            backgroundColor: Colors.grey.shade800,
+            selectedColor: Colors.white,
+            labelStyle: GoogleFonts.montserrat(color: Colors.black, fontWeight: FontWeight.bold),
+            secondaryLabelStyle: GoogleFonts.montserrat(color: Colors.black),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.white, width: 1),
+            ),
+            checkmarkColor: Colors.black,
+          ),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            backgroundColor: Colors.black,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.grey.shade400,
+            elevation: 0,
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: GoogleFonts.montserrat(fontWeight: FontWeight.w800),
+            landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.white, width: 1),
+            ),
+            elevation: 0,
+          ),
+          dialogTheme: DialogThemeData(
+            backgroundColor: Colors.grey.shade900,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.white, width: 1),
+            ),
+          ),
+          dividerTheme: const DividerThemeData(
+            color: Colors.white,
+            thickness: 1,
+            space: 24,
+          ),
+          progressIndicatorTheme: const ProgressIndicatorThemeData(
+            color: Colors.white,
+            linearTrackColor: Colors.grey,
+          ),
+          snackBarTheme: SnackBarThemeData(
+            backgroundColor: Colors.black,
+            contentTextStyle: GoogleFonts.montserrat(color: Colors.white, fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Colors.white, width: 1),
+            ),
+            behavior: SnackBarBehavior.floating,
+            elevation: 0,
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.grey.shade900,
+            labelStyle: GoogleFonts.montserrat(color: Colors.white),
+            hintStyle: GoogleFonts.montserrat(color: Colors.white54),
+            prefixIconColor: Colors.white,
+            suffixIconColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.white, width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.white54, width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.white, width: 1),
             ),
           ),
         ),
         debugShowCheckedModeBanner: false,
         initialRoute: AppRoutes.login,
-        routes: AppRoutes.getRoutes(),
-      ),
-    );
-  }
-}
-
-extension ColorExtension on Color {
+                    routes: AppRoutes.getRoutes(),
+                  );
+                },
+              ),
+            );
+          }
+        }
+        extension ColorExtension on Color {
   Color darken([double amount = .1]) {
     assert(amount >= 0 && amount <= 1);
     final hsl = HSLColor.fromColor(this);

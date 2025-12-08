@@ -8,7 +8,7 @@ import 'models/user.dart';
 
 Future<void> initHive() async {
   await Hive.initFlutter();
-  await Hive.deleteFromDisk(); // !!! TEMPORARY: Clear all Hive data to resolve TypeAdapter conflicts !!!
+  // await Hive.deleteFromDisk(); // Removed to ensure persistence
 
   // Register Adapters
   Hive.registerAdapter(SiswaAdapter());

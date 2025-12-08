@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/siswa_provider.dart';
 import '../providers/jadwal_provider.dart';
 import '../providers/nilai_provider.dart';
@@ -169,6 +170,16 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
           ),
           actions: [
             IconButton(
+              icon: Icon(
+                Provider.of<ThemeProvider>(context).isDarkMode
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
+              onPressed: () {
+                Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+              },
+            ),
+            IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
                 authProvider.logout();
@@ -208,8 +219,11 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
           elevation: 2,
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue[700],
+            leading: Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              color: Theme.of(context).primaryColor,
               child: Text(
                 jadwal.hari.substring(0, 1),
                 style: const TextStyle(color: Colors.white),
@@ -252,7 +266,7 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Card(
                   elevation: 4,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -339,7 +353,7 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                                   },
                                   tooltipPadding: const EdgeInsets.all(8), // Add padding for better look
                                   tooltipBorder: BorderSide(color: Theme.of(context).colorScheme.primary), // Add a border
-                                  tooltipRoundedRadius: 8, // Rounded corners for tooltip
+                                  tooltipRoundedRadius: 0, // Sharp corners for tooltip
                                 ),
                               ),
                               maxY: 100,
@@ -385,7 +399,7 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                             ),
                             decoration: BoxDecoration(
                               color: _getPredikatColor(nilai.predikat),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.zero,
                             ),
                             child: Text(
                               nilai.predikat,
@@ -417,10 +431,7 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
             toY: nilaiList[i].nilaiAkhir,
             color: Theme.of(context).colorScheme.primary,
             width: 16,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(6),
-              topRight: Radius.circular(6),
-            ),
+            borderRadius: BorderRadius.zero,
           ),
         ],
         showingTooltipIndicators: [0],
@@ -443,13 +454,13 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
   Color _getPredikatColor(String predikat) {
     switch (predikat) {
       case 'A':
-        return Colors.green;
+        return Theme.of(context).primaryColor;
       case 'B':
-        return Colors.blue;
+        return Theme.of(context).primaryColor;
       case 'C':
-        return Colors.orange;
+        return Theme.of(context).primaryColor;
       case 'D':
-        return Colors.red;
+        return Theme.of(context).colorScheme.error;
       default:
         return Colors.grey;
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 import '../routes.dart';
 
 class GuruDashboard extends StatelessWidget {
@@ -14,6 +15,16 @@ class GuruDashboard extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Dashboard Guru'),
         actions: [
+          IconButton(
+            icon: Icon(
+              Provider.of<ThemeProvider>(context).isDarkMode
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
@@ -34,9 +45,10 @@ class GuruDashboard extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.green[700],
+                    Container(
+                      width: 60,
+                      height: 60,
+                      color: Theme.of(context).colorScheme.primary, // Primary color
                       child: const Icon(
                         Icons.person,
                         size: 35,
@@ -58,7 +70,7 @@ class GuruDashboard extends StatelessWidget {
                           'Role: ${authProvider.currentRole}',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                           ),
                         ),
                       ],
@@ -86,7 +98,7 @@ class GuruDashboard extends StatelessWidget {
                     context,
                     icon: Icons.grade,
                     title: 'Input Nilai',
-                    color: Colors.blue,
+                    color: Theme.of(context).primaryColor,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.nilaiInput);
                     },
@@ -95,7 +107,7 @@ class GuruDashboard extends StatelessWidget {
                     context,
                     icon: Icons.schedule,
                     title: 'Jadwal Pelajaran',
-                    color: Colors.orange,
+                    color: Theme.of(context).primaryColor,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.jadwalCrud);
                     },
@@ -104,7 +116,7 @@ class GuruDashboard extends StatelessWidget {
                     context,
                     icon: Icons.announcement,
                     title: 'Pengumuman',
-                    color: Colors.purple,
+                    color: Theme.of(context).primaryColor,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.pengumuman);
                     },
@@ -126,13 +138,10 @@ class GuruDashboard extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      elevation: 0,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -145,9 +154,10 @@ class GuruDashboard extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],

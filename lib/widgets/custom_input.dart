@@ -33,11 +33,6 @@ class CustomInput extends StatelessWidget {
         enabled: enabled,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          filled: true,
-          fillColor: enabled ? Colors.white : Colors.grey[200],
         ),
       ),
     );

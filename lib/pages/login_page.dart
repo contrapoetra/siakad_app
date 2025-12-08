@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/custom_input.dart';
-import '../widgets/custom_button.dart';
 import '../routes.dart';
 
 class LoginPage extends StatefulWidget {
@@ -54,9 +53,9 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.of(context).pushReplacementNamed(route);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Username atau password salah!'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('Username atau password salah!'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -66,108 +65,112 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.darken(0.2)],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Form(
-                    key: _formKey,
+        backgroundColor: Theme.of(context).colorScheme.onPrimary,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Icon(Icons.school, size: 100, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(height: 24),
+                  Text(
+                    'SIAKAD SEKOLAH',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Sistem Informasi Akademik',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                  CustomInput(
+                    label: 'Username',
+                    controller: _usernameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Username tidak boleh kosong';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  CustomInput(
+                    label: 'Password',
+                    controller: _passwordController,
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Password tidak boleh kosong';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : SizedBox(
+                          height: 56, // Taller button for fullscreen look
+                          child: ElevatedButton(
+                            onPressed: _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary, // Primary button
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'LOGIN',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.0,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                  const SizedBox(height: 48),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      border: Border.all(color: Theme.of(context).colorScheme.tertiary, width: 1),
+                    ),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.school, size: 80, color: Theme.of(context).colorScheme.primary),
-                        const SizedBox(height: 16),
                         Text(
-                          'SIAKAD SEKOLAH',
+                          'Dummy Login Credentials:',
                           style: TextStyle(
-                            fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Sistem Informasi Akademik',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        CustomInput(
-                          label: 'Username',
-                          controller: _usernameController,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Username tidak boleh kosong';
-                            }
-                            return null;
-                          },
-                        ),
-                        CustomInput(
-                          label: 'Password',
-                          controller: _passwordController,
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password tidak boleh kosong';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        _isLoading
-                            ? const CircularProgressIndicator()
-                            : CustomButton(
-                                text: 'LOGIN',
-                                onPressed: _login,
-                                icon: Icons.login,
-                              ),
-                        const SizedBox(height: 24),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Dummy Login Credentials:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Admin: admin / admin123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                              Text('Guru: guru / guru123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                              Text('Siswa: Ahmad Rizki / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                              Text('Siswa: Siti Nurhaliza / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                              Text('Siswa: Abbiyi QS / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                            ],
-                          ),
-                        ),
+                        Text('Admin: admin / admin123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                        Text('Guru: guru / guru123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                        Text('Siswa: Ahmad Rizki / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                        Text('Siswa: Siti Nurhaliza / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                        Text('Siswa: Abbiyi QS / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -176,13 +179,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-extension ColorExtension on Color {
-  Color darken([double amount = .1]) {
-    assert(amount >= 0 && amount <= 1);
-    final hsl = HSLColor.fromColor(this);
-    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
-    return hslDark.toColor();
-  }
-}
-

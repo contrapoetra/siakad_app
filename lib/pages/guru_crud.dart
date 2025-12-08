@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../models/guru.dart';
 import '../providers/guru_provider.dart';
@@ -29,14 +30,24 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(guru == null ? 'Tambah Guru' : 'Edit Guru'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
+          ),
+          Center(
+            child: AlertDialog(
+              title: Text(guru == null ? 'Tambah Guru' : 'Edit Guru'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                 CustomInput(
                   label: 'NIP',
                   controller: nipController,
@@ -71,43 +82,46 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (formKey.currentState!.validate()) {
-                final provider = Provider.of<GuruProvider>(context, listen: false);
-                final newGuru = Guru(
-                  nip: nipController.text,
-                  nama: namaController.text,
-                  mataPelajaran: mataPelajaranController.text,
-                );
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      final provider = Provider.of<GuruProvider>(context, listen: false);
+                      final newGuru = Guru(
+                        nip: nipController.text,
+                        nama: namaController.text,
+                        mataPelajaran: mataPelajaranController.text,
+                      );
 
-                if (index == null) {
-                  await provider.addGuru(newGuru);
-                } else {
-                  await provider.updateGuru(index, newGuru);
-                }
+                      if (index == null) {
+                        await provider.addGuru(newGuru);
+                      } else {
+                        await provider.updateGuru(index, newGuru);
+                      }
 
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        guru == null
-                            ? 'Guru berhasil ditambahkan'
-                            : 'Guru berhasil diupdate',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Simpan'),
+                      if (mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              guru == null
+                                  ? 'Guru berhasil ditambahkan'
+                                  : 'Guru berhasil diupdate',
+                            ),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Simpan'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -117,30 +131,43 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
   void _confirmDelete(int index, String nama) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: Text('Apakah Anda yakin ingin menghapus data guru $nama?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final provider = Provider.of<GuruProvider>(context, listen: false);
-              await provider.deleteGuru(index);
-              if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Guru berhasil dihapus'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Hapus'),
+          Center(
+            child: AlertDialog(
+              title: const Text('Konfirmasi Hapus'),
+              content: Text('Apakah Anda yakin ingin menghapus data guru $nama?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final provider = Provider.of<GuruProvider>(context, listen: false);
+                    await provider.deleteGuru(index);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Guru berhasil dihapus'),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  child: const Text('Hapus'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -168,11 +195,14 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
               itemBuilder: (context, index) {
                 final guru = provider.guruList[index];
                 return Card(
-                  elevation: 2,
+                  elevation: 0,
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.green[700],
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      color: Theme.of(context).colorScheme.secondary,
                       child: Text(
                         guru.nama.substring(0, 1),
                         style: const TextStyle(color: Colors.white),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../models/nilai.dart';
 import '../providers/nilai_provider.dart';
@@ -41,13 +42,23 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(nilai == null ? 'Input Nilai' : 'Edit Nilai'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: StatefulBuilder(
-              builder: (context, setDialogState) {
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
+          ),
+          Center(
+            child: AlertDialog(
+              title: Text(nilai == null ? 'Input Nilai' : 'Edit Nilai'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: StatefulBuilder(
+                    builder: (context, setDialogState) {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -55,8 +66,8 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                       value: selectedNis,
                       decoration: InputDecoration(
                         labelText: 'Pilih Siswa',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                       items: siswaProvider.siswaList.map((siswa) {
@@ -82,8 +93,8 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                       value: selectedMataPelajaran,
                       decoration: InputDecoration(
                         labelText: 'Pilih Mata Pelajaran',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
                       items: guruProvider.guruList.map((guru) {
@@ -155,53 +166,60 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (formKey.currentState!.validate()) {
-                final provider = Provider.of<NilaiProvider>(context, listen: false);
-                final siswa = siswaProvider.getSiswaByNis(selectedNis!);
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      final provider = Provider.of<NilaiProvider>(context, listen: false);
+                      final siswa = siswaProvider.getSiswaByNis(selectedNis!);
 
-                final newNilai = Nilai(
-                  nis: selectedNis!,
-                  namaSiswa: siswa?.nama ?? '',
-                  mataPelajaran: selectedMataPelajaran!,
-                  nilaiTugas: double.parse(tugasController.text),
-                  nilaiUTS: double.parse(utsController.text),
-                  nilaiUAS: double.parse(uasController.text),
-                );
+                      final newNilai = Nilai(
+                        nis: selectedNis!,
+                        namaSiswa: siswa?.nama ?? '',
+                        mataPelajaran: selectedMataPelajaran!,
+                        nilaiTugas: double.parse(tugasController.text),
+                        nilaiUTS: double.parse(utsController.text),
+                        nilaiUAS: double.parse(uasController.text),
+                      );
 
-                if (index == null) {
-                  // Check if nilai already exists
-                  final existingIndex = provider.getNilaiIndex(
-                    selectedNis!,
-                    selectedMataPelajaran!,
-                  );
-                  if (existingIndex != null) {
-                    await provider.updateNilai(existingIndex, newNilai);
-                  } else {
-                    await provider.addNilai(newNilai);
-                  }
-                } else {
-                  await provider.updateNilai(index, newNilai);
-                }
+                      if (index == null) {
+                        // Check if nilai already exists
+                        final existingIndex = provider.getNilaiIndex(
+                          selectedNis!,
+                          selectedMataPelajaran!,
+                        );
+                        if (existingIndex != null) {
+                          await provider.updateNilai(existingIndex, newNilai);
+                        } else {
+                          await provider.addNilai(newNilai);
+                        }
+                      } else {
+                        await provider.updateNilai(index, newNilai);
+                      }
 
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Nilai berhasil disimpan'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Simpan'),
+                      if (mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              nilai == null
+                                  ? 'Nilai berhasil disimpan'
+                                  : 'Nilai berhasil diupdate',
+                            ),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Simpan'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -211,31 +229,44 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
   void _confirmDelete(int index, String namaSiswa, String mataPelajaran) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: Text(
-            'Apakah Anda yakin ingin menghapus nilai $mataPelajaran untuk $namaSiswa?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.black.withOpacity(0.3)),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final provider = Provider.of<NilaiProvider>(context, listen: false);
-              await provider.deleteNilai(index);
-              if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Nilai berhasil dihapus'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Hapus'),
+          Center(
+            child: AlertDialog(
+              title: const Text('Konfirmasi Hapus'),
+              content: Text(
+                  'Apakah Anda yakin ingin menghapus nilai $mataPelajaran untuk $namaSiswa?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final provider = Provider.of<NilaiProvider>(context, listen: false);
+                    await provider.deleteNilai(index);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Nilai berhasil dihapus'),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+                  child: const Text('Hapus'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -281,8 +312,11 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                   elevation: 2,
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ExpansionTile(
-                    leading: CircleAvatar(
-                      backgroundColor: _getPredikatColor(nilai.predikat),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      color: _getPredikatColor(nilai.predikat),
                       child: Text(
                         nilai.predikat,
                         style: const TextStyle(
