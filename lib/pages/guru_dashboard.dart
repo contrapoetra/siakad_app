@@ -49,10 +49,10 @@ class GuruDashboard extends StatelessWidget {
                       width: 60,
                       height: 60,
                       color: Theme.of(context).colorScheme.primary, // Primary color
-                      child: const Icon(
+                      child: Icon(
                         Icons.person,
                         size: 35,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -98,7 +98,7 @@ class GuruDashboard extends StatelessWidget {
                     context,
                     icon: Icons.grade,
                     title: 'Input Nilai',
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.nilaiInput);
                     },
@@ -107,7 +107,7 @@ class GuruDashboard extends StatelessWidget {
                     context,
                     icon: Icons.schedule,
                     title: 'Jadwal Pelajaran',
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.jadwalCrud);
                     },
@@ -116,7 +116,7 @@ class GuruDashboard extends StatelessWidget {
                     context,
                     icon: Icons.announcement,
                     title: 'Pengumuman',
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.pengumuman);
                     },

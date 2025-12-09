@@ -139,7 +139,7 @@ class MyApp extends StatelessWidget {
             checkmarkColor: Colors.white,
           ),
           listTileTheme: ListTileThemeData(
-            shape: const Border(
+            shape: Border(
               bottom: BorderSide(color: Colors.black, width: 1),
             ),
             tileColor: Colors.white,
@@ -227,15 +227,15 @@ class MyApp extends StatelessWidget {
             iconColor: Colors.white,
             textColor: Colors.white,
             tileColor: Colors.grey.shade900,
-            shape: const Border(
-              bottom: BorderSide(color: Colors.white, width: 1),
+            shape: Border(
+              bottom: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
           ),
           appBarTheme: AppBarTheme(
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             elevation: 0,
-            shape: const Border(bottom: BorderSide(color: Colors.white, width: 1)),
+            shape: Border(bottom: BorderSide(color: Colors.grey.shade600, width: 1)),
             titleTextStyle: GoogleFonts.montserrat(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -248,7 +248,7 @@ class MyApp extends StatelessWidget {
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.white, width: 1),
+              side: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
             margin: const EdgeInsets.all(8),
           ),
@@ -259,7 +259,7 @@ class MyApp extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 32),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Colors.white, width: 1),
+                side: BorderSide(color: Colors.grey.shade600, width: 1),
               ),
               textStyle: GoogleFonts.montserrat(
                 fontWeight: FontWeight.bold,
@@ -286,7 +286,7 @@ class MyApp extends StatelessWidget {
             secondaryLabelStyle: GoogleFonts.montserrat(color: Colors.black),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.white, width: 1),
+              side: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
             checkmarkColor: Colors.black,
           ),
@@ -304,7 +304,7 @@ class MyApp extends StatelessWidget {
             foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.white, width: 1),
+              side: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
             elevation: 0,
           ),
@@ -313,11 +313,11 @@ class MyApp extends StatelessWidget {
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.white, width: 1),
+              side: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
           ),
           dividerTheme: const DividerThemeData(
-            color: Colors.white,
+            color: Colors.grey,
             thickness: 1,
             space: 24,
           ),
@@ -330,7 +330,7 @@ class MyApp extends StatelessWidget {
             contentTextStyle: GoogleFonts.montserrat(color: Colors.white, fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Colors.white, width: 1),
+              side: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
             behavior: SnackBarBehavior.floating,
             elevation: 0,
@@ -344,15 +344,15 @@ class MyApp extends StatelessWidget {
             suffixIconColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.white, width: 1),
+              borderSide: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.white54, width: 1),
+              borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.white, width: 1),
+              borderSide: BorderSide(color: Colors.grey.shade600, width: 1),
             ),
           ),
         ),

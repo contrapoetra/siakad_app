@@ -223,10 +223,10 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
               width: 40,
               height: 40,
               alignment: Alignment.center,
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).colorScheme.primary,
               child: Text(
                 jadwal.hari.substring(0, 1),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
               ),
             ),
             title: Text(jadwal.mataPelajaran),
@@ -403,8 +403,8 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                             ),
                             child: Text(
                               nilai.predikat,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -454,11 +454,11 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
   Color _getPredikatColor(String predikat) {
     switch (predikat) {
       case 'A':
-        return Theme.of(context).primaryColor;
+        return Theme.of(context).colorScheme.primary;
       case 'B':
-        return Theme.of(context).primaryColor;
+        return Theme.of(context).colorScheme.primary;
       case 'C':
-        return Theme.of(context).primaryColor;
+        return Theme.of(context).colorScheme.primary;
       case 'D':
         return Theme.of(context).colorScheme.error;
       default:

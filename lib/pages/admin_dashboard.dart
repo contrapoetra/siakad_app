@@ -49,10 +49,10 @@ class AdminDashboard extends StatelessWidget {
                       width: 60,
                       height: 60,
                       color: Theme.of(context).colorScheme.primary, // Primary color
-                      child: const Icon(
+                      child: Icon(
                         Icons.person,
                         size: 35,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -98,7 +98,7 @@ class AdminDashboard extends StatelessWidget {
                     context,
                     icon: Icons.people,
                     title: 'Data Siswa',
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.siswaCrud);
                     },
@@ -107,7 +107,7 @@ class AdminDashboard extends StatelessWidget {
                     context,
                     icon: Icons.person,
                     title: 'Data Guru',
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.guruCrud);
                     },
@@ -116,7 +116,7 @@ class AdminDashboard extends StatelessWidget {
                     context,
                     icon: Icons.schedule,
                     title: 'Jadwal Pelajaran',
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.jadwalCrud);
                     },
@@ -125,7 +125,7 @@ class AdminDashboard extends StatelessWidget {
                     context,
                     icon: Icons.announcement,
                     title: 'Pengumuman',
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.pengumuman);
                     },

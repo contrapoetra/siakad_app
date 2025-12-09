@@ -104,7 +104,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
                                   ? 'Pengumuman berhasil ditambahkan'
                                   : 'Pengumuman berhasil diupdate',
                             ),
-                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
                         );
                       }
@@ -241,7 +241,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
                       width: 40,
                       height: 40,
                       alignment: Alignment.center,
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).colorScheme.primary,
                       child: Icon(
                         Icons.announcement,
                         color: Theme.of(context).colorScheme.onPrimary,
