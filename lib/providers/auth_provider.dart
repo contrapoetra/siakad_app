@@ -21,11 +21,11 @@ class AuthProvider with ChangeNotifier {
 
   bool get isLoggedIn => _currentRole != null;
 
-  Future<bool> register(String username, String password, String desiredRole) async {
+  Future<bool> register(String nomorInduk, String password, String desiredRole, {String? email}) async {
     final userBox = Hive.box<User>('users');
-    // Check if username already exists
-    if (userBox.values.any((user) => user.username == username)) {
-      return false; // Username already taken
+    // Check if nomorInduk already exists
+    if (userBox.values.any((user) => user.nomorInduk == nomorInduk)) {
+      return false; // Nomor Induk already taken
     }
 
     String initialRole = 'Siswa';
@@ -40,11 +40,13 @@ class AuthProvider with ChangeNotifier {
     }
 
     final newUser = User(
-      username: username,
-      password: password,
+      nomorInduk: nomorInduk,
+      password: password, // This will be the initial password set by admin or during registration
       role: initialRole,
       requestedRole: requestedRole,
       requestStatus: requestStatus,
+      email: email,
+      isPasswordSet: true, // For manual registration, password is set immediately
     );
 
     await userBox.add(newUser);
@@ -52,32 +54,42 @@ class AuthProvider with ChangeNotifier {
     return true;
   }
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String nomorInduk, String password) async {
     final userBox = Hive.box<User>('users');
     final user = userBox.values.firstWhere(
-      (user) => user.username == username,
-      orElse: () => User(username: '', password: '', role: '')
+      (user) => user.nomorInduk == nomorInduk,
+      orElse: () => User(nomorInduk: '', password: '', role: '')
     );
 
-    if (user.username.isNotEmpty && user.password == password) {
-      _currentUsername = user.username;
+    if (user.nomorInduk.isNotEmpty && user.password == password) {
+      if (!user.isPasswordSet) {
+        // User needs to set a password first via forgot password flow
+        return false;
+      }
+
+      _currentUserId = user.nomorInduk;
       _currentRole = user.role;
       _currentUserRequestedRole = user.requestedRole;
       _currentUserRequestStatus = user.requestStatus;
       _currentUser = user; // Set the current user object
       
-      // Set _currentUserId based on role or type of username used
-      if (user.role == 'Siswa') {
-        // Assuming username is nama in the dummy data, let's find by nama
+      // Try to get actual name from Siswa/Guru models
+      String? actualName;
+      if (user.isSiswa) {
         final siswaBox = Hive.box<Siswa>('siswa');
-        _currentUserId = siswaBox.values.firstWhere((Siswa s) => s.nama == username, orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: '')).nis; // Explicitly type s as Siswa
-      } else if (user.role == 'Guru') {
-        // Similar logic for Guru NIP
+        final siswa = siswaBox.values.firstWhere((s) => s.nis == user.nomorInduk, orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: '', namaAyah: '', namaIbu: ''));
+        if (siswa.nis.isNotEmpty) {
+          actualName = siswa.nama;
+        }
+      } else if (user.isGuru) {
         final guruBox = Hive.box<Guru>('guru');
-        _currentUserId = guruBox.values.firstWhere((Guru g) => g.nama == username, orElse: () => Guru(nip: '', nama: '', mataPelajaran: '')).nip; // Explicitly type g as Guru
-      } else if (user.role == 'Admin') {
-        _currentUserId = 'admin'; // Or a dedicated admin ID
+        final guru = guruBox.values.firstWhere((g) => g.nip == user.nomorInduk, orElse: () => Guru(nip: '', nama: '', gelar: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: ''));
+        if (guru.nip.isNotEmpty) {
+          actualName = guru.nama;
+        }
       }
+
+      _currentUsername = actualName ?? user.nomorInduk; // Fallback to nomorInduk if name not found
       
       notifyListeners();
       return true;
@@ -106,13 +118,51 @@ class AuthProvider with ChangeNotifier {
   // New method to update a user's role and request status
   Future<void> updateUserRoleAndStatus(User user, String newRole, String newStatus) async {
     final userBox = Hive.box<User>('users');
-    final userIndex = userBox.values.toList().indexOf(user);
+    final userIndex = userBox.values.toList().indexWhere((u) => u.nomorInduk == user.nomorInduk);
     if (userIndex != -1) {
       user.role = newRole;
       user.requestedRole = null; // Clear requested role after approval/rejection
       user.requestStatus = newStatus;
       await userBox.putAt(userIndex, user);
+      // If the current logged-in user's role was updated, reflect it
+      if (_currentUser?.nomorInduk == user.nomorInduk) {
+        _currentUser = user;
+        _currentRole = user.role;
+        _currentUserRequestedRole = user.requestedRole;
+        _currentUserRequestStatus = user.requestStatus;
+      }
       notifyListeners();
     }
+  }
+
+  // Forgot Password Flow Methods
+  Future<bool> forgotPassword(String nomorInduk) async {
+    final userBox = Hive.box<User>('users');
+    final user = userBox.values.firstWhere(
+      (user) => user.nomorInduk == nomorInduk,
+      orElse: () => User(nomorInduk: '', password: '', role: '')
+    );
+    // For now, just check if user exists. Email sending is simulated.
+    return user.nomorInduk.isNotEmpty;
+  }
+
+  bool verifyPin(String nomorInduk, String pin) {
+    // Hardcoded PIN for now as per requirement
+    return pin == '528491';
+  }
+
+  Future<bool> resetPassword(String nomorInduk, String newPassword) async {
+    final userBox = Hive.box<User>('users');
+    final userIndex = userBox.values.toList().indexWhere((u) => u.nomorInduk == nomorInduk);
+
+    if (userIndex != -1) {
+      final user = userBox.getAt(userIndex)!;
+      user.password = newPassword;
+      user.isPasswordSet = true;
+      await userBox.putAt(userIndex, user);
+      notifyListeners();
+      return true;
+    }
+    return false;
   }
 }

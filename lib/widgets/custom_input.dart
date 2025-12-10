@@ -8,6 +8,8 @@ class CustomInput extends StatelessWidget {
   final bool obscureText;
   final int maxLines;
   final bool enabled;
+  final bool readOnly; // New parameter
+  final VoidCallback? onTap; // New parameter
 
   const CustomInput({
     super.key,
@@ -18,6 +20,8 @@ class CustomInput extends StatelessWidget {
     this.obscureText = false,
     this.maxLines = 1,
     this.enabled = true,
+    this.readOnly = false, // Default to false
+    this.onTap, // Optional onTap callback
   });
 
   @override
@@ -31,6 +35,8 @@ class CustomInput extends StatelessWidget {
         obscureText: obscureText,
         maxLines: maxLines,
         enabled: enabled,
+        readOnly: readOnly, // Pass to TextFormField
+        onTap: onTap, // Pass to TextFormField
         decoration: InputDecoration(
           labelText: label,
         ),

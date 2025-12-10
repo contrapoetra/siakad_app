@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../routes.dart';
+import '../services/dummy_data_service.dart'; // Import DummyDataService
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -137,6 +138,27 @@ class AdminDashboard extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.roleRequest);
+                    },
+                  ),
+                  _buildMenuCard(
+                    context,
+                    icon: Icons.storage,
+                    title: 'Generate Data',
+                    color: Theme.of(context).colorScheme.error, // Use error color for destructive action
+                    onTap: () async {
+                      // Show loading indicator
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Generating dummy data...'), duration: Duration(seconds: 2)),
+                      );
+                      await DummyDataService().generateDummyData();
+                      // Logout and navigate to login
+                      authProvider.logout();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Dummy data generated! Please log in.')),
+                        );
+                        Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+                      }
                     },
                   ),
                 ],

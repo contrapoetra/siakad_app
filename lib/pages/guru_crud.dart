@@ -5,6 +5,7 @@ import '../models/guru.dart';
 import '../providers/guru_provider.dart';
 import '../widgets/custom_input.dart';
 import '../widgets/empty_state.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
 
 class GuruCrudPage extends StatefulWidget {
   const GuruCrudPage({super.key});
@@ -26,7 +27,11 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
     final formKey = GlobalKey<FormState>();
     final nipController = TextEditingController(text: guru?.nip ?? '');
     final namaController = TextEditingController(text: guru?.nama ?? '');
-    final mataPelajaranController = TextEditingController(text: guru?.mataPelajaran ?? '');
+    final emailController = TextEditingController(text: guru?.email ?? '');
+    final tempatLahirController = TextEditingController(text: guru?.tempatLahir ?? '');
+    final gelarController = TextEditingController(text: guru?.gelar ?? '');
+
+    DateTime? selectedTanggalLahir = guru?.tanggalLahir;
 
     showDialog(
       context: context,
@@ -48,40 +53,89 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                CustomInput(
-                  label: 'NIP',
-                  controller: nipController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'NIP tidak boleh kosong';
-                    }
-                    return null;
-                  },
+                      CustomInput(
+                        label: 'NIP',
+                        controller: nipController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'NIP tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Nama',
+                        controller: namaController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nama tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Email',
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email tidak boleh kosong';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Format email tidak valid';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Tanggal Lahir',
+                        controller: TextEditingController(text: selectedTanggalLahir != null ? DateFormat('dd/MM/yyyy').format(selectedTanggalLahir!) : ''),
+                        readOnly: true,
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: selectedTanggalLahir ?? DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null) {
+                            setState(() { // setState for the dialog
+                              selectedTanggalLahir = pickedDate;
+                              (formKey.currentState as dynamic)?.setState(() {}); // Force rebuild of dialog content
+                            });
+                          }
+                        },
+                        validator: (value) {
+                          if (selectedTanggalLahir == null) {
+                            return 'Tanggal Lahir tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Tempat Lahir',
+                        controller: tempatLahirController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Tempat Lahir tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Gelar',
+                        controller: gelarController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Gelar tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                CustomInput(
-                  label: 'Nama',
-                  controller: namaController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Nama tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-                CustomInput(
-                  label: 'Mata Pelajaran',
-                  controller: mataPelajaranController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Mata Pelajaran tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -90,11 +144,24 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
                 ElevatedButton(
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
+                      if (selectedTanggalLahir == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Tanggal Lahir harus diisi.'),
+                            backgroundColor: Theme.of(context).colorScheme.error,
+                          ),
+                        );
+                        return;
+                      }
+                      
                       final provider = Provider.of<GuruProvider>(context, listen: false);
                       final newGuru = Guru(
                         nip: nipController.text,
                         nama: namaController.text,
-                        mataPelajaran: mataPelajaranController.text,
+                        email: emailController.text,
+                        tanggalLahir: selectedTanggalLahir!,
+                        tempatLahir: tempatLahirController.text,
+                        gelar: gelarController.text,
                       );
 
                       if (index == null) {
@@ -112,7 +179,7 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
                                   ? 'Guru berhasil ditambahkan'
                                   : 'Guru berhasil diupdate',
                             ),
-                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
                         );
                       }
@@ -210,7 +277,7 @@ class _GuruCrudPageState extends State<GuruCrudPage> {
                     ),
                     title: Text(guru.nama),
                     subtitle: Text(
-                      'NIP: ${guru.nip}\nMata Pelajaran: ${guru.mataPelajaran}',
+                      'NIP: ${guru.nip}\nEmail: ${guru.email}\nTTL: ${DateFormat('dd/MM/yyyy').format(guru.tanggalLahir)} di ${guru.tempatLahir}\nGelar: ${guru.gelar}',
                     ),
                     isThreeLine: true,
                     trailing: PopupMenuButton(

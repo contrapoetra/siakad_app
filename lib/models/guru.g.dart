@@ -19,20 +19,29 @@ class GuruAdapter extends TypeAdapter<Guru> {
     return Guru(
       nip: fields[0] as String,
       nama: fields[1] as String,
-      mataPelajaran: fields[2] as String,
+      email: fields[2] as String,
+      tanggalLahir: fields[3] as DateTime,
+      tempatLahir: fields[4] as String,
+      gelar: fields[5] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Guru obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.nip)
       ..writeByte(1)
       ..write(obj.nama)
       ..writeByte(2)
-      ..write(obj.mataPelajaran);
+      ..write(obj.email)
+      ..writeByte(3)
+      ..write(obj.tanggalLahir)
+      ..writeByte(4)
+      ..write(obj.tempatLahir)
+      ..writeByte(5)
+      ..write(obj.gelar);
   }
 
   @override

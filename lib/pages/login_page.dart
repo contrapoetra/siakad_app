@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:hive/hive.dart'; // Add this import
+import '../models/user.dart'; // Add this import
 import '../providers/auth_provider.dart';
 import '../widgets/custom_input.dart';
 import '../routes.dart';
@@ -14,13 +16,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _nomorIndukController = TextEditingController(); // Changed to nomorInduk
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _nomorIndukController.dispose(); // Changed to nomorInduk
     _passwordController.dispose();
     super.dispose();
   }
@@ -33,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final success = await authProvider.login(
-        _usernameController.text,
+        _nomorIndukController.text, // Changed to nomorInduk
         _passwordController.text,
       );
 
@@ -53,9 +55,20 @@ class _LoginPageState extends State<LoginPage> {
 
         Navigator.of(context).pushReplacementNamed(route);
       } else if (mounted) {
+        final userBox = Hive.box<User>('users'); // Access Hive box directly for check
+        final user = userBox.values.firstWhere(
+          (user) => user.nomorInduk == _nomorIndukController.text,
+          orElse: () => User(nomorInduk: '', password: '', role: '')
+        );
+
+        String errorMessage = 'Nomor Induk atau password salah!';
+        if (user.nomorInduk.isNotEmpty && !user.isPasswordSet) {
+          errorMessage = 'Anda perlu mengatur password Anda. Silakan gunakan fitur Lupa Password.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Username atau password salah!'),
+            content: Text(errorMessage),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -103,11 +116,11 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 48),
                       CustomInput(
-                        label: 'Username',
-                        controller: _usernameController,
+                        label: 'Nomor Induk', // Changed label
+                        controller: _nomorIndukController, // Changed controller
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Username tidak boleh kosong';
+                            return 'Nomor Induk tidak boleh kosong';
                           }
                           return null;
                         },
@@ -124,7 +137,16 @@ class _LoginPageState extends State<LoginPage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 32),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(AppRoutes.forgotPassword); // New route
+                          },
+                          child: const Text('Lupa Password?'),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       _isLoading
                           ? const Center(child: CircularProgressIndicator())
                           : SizedBox(
@@ -160,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
-                                          ],
+                    ],
                   ),
                 ),
               ),
@@ -188,3 +210,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

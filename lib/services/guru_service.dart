@@ -13,7 +13,7 @@ class GuruService {
   Guru? getGuruByNip(String nip) {
     return _box.values.firstWhere(
       (guru) => guru.nip == nip,
-      orElse: () => Guru(nip: '', nama: '', mataPelajaran: ''),
+      orElse: () => Guru(nip: '', nama: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: '', gelar: ''),
     );
   }
 

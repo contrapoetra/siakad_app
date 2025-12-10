@@ -25,4 +25,16 @@ Future<void> initHive() async {
   await Hive.openBox<Nilai>('nilai');
   await Hive.openBox<Pengumuman>('pengumuman');
   await Hive.openBox<User>('users'); // Open the users box
+
+  // Ensure initial admin user exists if userBox is empty
+  final userBox = Hive.box<User>('users');
+  if (userBox.isEmpty) {
+    await userBox.add(User(
+      nomorInduk: 'admin',
+      password: 'admin123',
+      role: 'Admin',
+      email: 'admin@example.com',
+      isPasswordSet: true,
+    ));
+  }
 }

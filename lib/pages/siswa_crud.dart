@@ -5,6 +5,7 @@ import '../models/siswa.dart';
 import '../providers/siswa_provider.dart';
 import '../widgets/custom_input.dart';
 import '../widgets/empty_state.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
 
 class SiswaCrudPage extends StatefulWidget {
   const SiswaCrudPage({super.key});
@@ -26,8 +27,14 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
     final formKey = GlobalKey<FormState>();
     final nisController = TextEditingController(text: siswa?.nis ?? '');
     final namaController = TextEditingController(text: siswa?.nama ?? '');
+    final emailController = TextEditingController(text: siswa?.email ?? '');
+    final tempatLahirController = TextEditingController(text: siswa?.tempatLahir ?? '');
+    final namaAyahController = TextEditingController(text: siswa?.namaAyah ?? '');
+    final namaIbuController = TextEditingController(text: siswa?.namaIbu ?? '');
     final kelasController = TextEditingController(text: siswa?.kelas ?? '');
     final jurusanController = TextEditingController(text: siswa?.jurusan ?? '');
+
+    DateTime? selectedTanggalLahir = siswa?.tanggalLahir;
 
     showDialog(
       context: context,
@@ -49,50 +56,119 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                CustomInput(
-                  label: 'NIS',
-                  controller: nisController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'NIS tidak boleh kosong';
-                    }
-                    return null;
-                  },
+                      CustomInput(
+                        label: 'NIS',
+                        controller: nisController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'NIS tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Nama',
+                        controller: namaController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nama tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Email',
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Email tidak boleh kosong';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Format email tidak valid';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Tanggal Lahir',
+                        controller: TextEditingController(text: selectedTanggalLahir != null ? DateFormat('dd/MM/yyyy').format(selectedTanggalLahir!) : ''),
+                        readOnly: true,
+                        onTap: () async {
+                          DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: selectedTanggalLahir ?? DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null) {
+                            setState(() { // setState for the dialog
+                              selectedTanggalLahir = pickedDate;
+                              (formKey.currentState as dynamic)?.setState(() {}); // Force rebuild of dialog content
+                            });
+                          }
+                        },
+                        validator: (value) {
+                          if (selectedTanggalLahir == null) {
+                            return 'Tanggal Lahir tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Tempat Lahir',
+                        controller: tempatLahirController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Tempat Lahir tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Nama Ayah',
+                        controller: namaAyahController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nama Ayah tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Nama Ibu',
+                        controller: namaIbuController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nama Ibu tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Kelas',
+                        controller: kelasController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Kelas tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      CustomInput(
+                        label: 'Jurusan',
+                        controller: jurusanController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Jurusan tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                CustomInput(
-                  label: 'Nama',
-                  controller: namaController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Nama tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-                CustomInput(
-                  label: 'Kelas',
-                  controller: kelasController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Kelas tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-                CustomInput(
-                  label: 'Jurusan',
-                  controller: jurusanController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Jurusan tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -101,10 +177,25 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
                 ElevatedButton(
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
+                      if (selectedTanggalLahir == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Tanggal Lahir harus diisi.'),
+                            backgroundColor: Theme.of(context).colorScheme.error,
+                          ),
+                        );
+                        return;
+                      }
+
                       final provider = Provider.of<SiswaProvider>(context, listen: false);
                       final newSiswa = Siswa(
                         nis: nisController.text,
                         nama: namaController.text,
+                        email: emailController.text,
+                        tanggalLahir: selectedTanggalLahir!,
+                        tempatLahir: tempatLahirController.text,
+                        namaAyah: namaAyahController.text,
+                        namaIbu: namaIbuController.text,
                         kelas: kelasController.text,
                         jurusan: jurusanController.text,
                       );
@@ -124,7 +215,7 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
                                   ? 'Siswa berhasil ditambahkan'
                                   : 'Siswa berhasil diupdate',
                             ),
-                            backgroundColor: Theme.of(context).primaryColor,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
                         );
                       }
@@ -222,7 +313,7 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
                     ),
                     title: Text(siswa.nama),
                     subtitle: Text(
-                      'NIS: ${siswa.nis}\nKelas: ${siswa.kelas} ${siswa.jurusan}',
+                      'NIS: ${siswa.nis}\nEmail: ${siswa.email}\nTTL: ${DateFormat('dd/MM/yyyy').format(siswa.tanggalLahir)} di ${siswa.tempatLahir}\nOrang Tua: ${siswa.namaAyah} & ${siswa.namaIbu}\nKelas: ${siswa.kelas} ${siswa.jurusan}',
                     ),
                     isThreeLine: true,
                     trailing: PopupMenuButton(

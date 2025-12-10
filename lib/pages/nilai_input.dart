@@ -99,8 +99,8 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                       ),
                       items: guruProvider.guruList.map((guru) {
                         return DropdownMenuItem(
-                          value: guru.mataPelajaran,
-                          child: Text(guru.mataPelajaran),
+                          value: guru.gelar,
+                          child: Text(guru.gelar),
                         );
                       }).toList(),
                       onChanged: (value) {

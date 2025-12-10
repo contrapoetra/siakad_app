@@ -11,14 +11,34 @@ class Siswa extends HiveObject {
   late String nama;
 
   @HiveField(2)
-  late String kelas;
+  late String email; // New field for email
 
   @HiveField(3)
+  late DateTime tanggalLahir; // New field for date of birth
+
+  @HiveField(4)
+  late String tempatLahir; // New field for place of birth
+
+  @HiveField(5)
+  late String namaAyah; // New field for father's name
+
+  @HiveField(6)
+  late String namaIbu; // New field for mother's name
+
+  @HiveField(7)
+  late String kelas;
+
+  @HiveField(8)
   late String jurusan;
 
   Siswa({
     required this.nis,
     required this.nama,
+    required this.email,
+    required this.tanggalLahir,
+    required this.tempatLahir,
+    required this.namaAyah,
+    required this.namaIbu,
     required this.kelas,
     required this.jurusan,
   });

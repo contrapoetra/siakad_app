@@ -33,7 +33,7 @@ class RoleRequestPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Username: ${user.username}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Nomor Induk: ${user.nomorInduk}', style: const TextStyle(fontWeight: FontWeight.bold)),
                       Text('Role Saat Ini: ${user.role}'),
                       Text('Meminta Role: ${user.requestedRole}'),
                       Text('Status: ${user.requestStatus}'),

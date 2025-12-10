@@ -13,7 +13,7 @@ class SiswaService {
   Siswa? getSiswaByNis(String nis) {
     return _box.values.firstWhere(
       (siswa) => siswa.nis == nis,
-      orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: ''),
+      orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: '', namaAyah: '', namaIbu: ''),
     );
   }
 
