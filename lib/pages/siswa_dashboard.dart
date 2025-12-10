@@ -188,14 +188,61 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
             ),
           ],
         ),
-        body: TabBarView(
+        body: Column(
           children: [
-            // Tab Jadwal
-            _buildJadwalTab(jadwalList),
-            // Tab Nilai
-            _buildNilaiTab(nilaiList),
-            // Tab Pengumuman
-            _buildPengumumanTab(),
+            if (authProvider.currentUserRequestedRole != null &&
+                authProvider.currentUserRequestStatus != 'approved')
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  String message = '';
+                  Color backgroundColor = Colors.amber;
+                  IconData icon = Icons.info_outline;
+
+                  if (authProvider.currentUserRequestStatus == 'pending') {
+                    message =
+                        'Permintaan role ${authProvider.currentUserRequestedRole} Anda sedang menunggu persetujuan admin.';
+                    backgroundColor = Colors.blue.shade100;
+                    icon = Icons.info_outline;
+                  } else if (authProvider.currentUserRequestStatus == 'rejected') {
+                    message =
+                        'Permintaan role ${authProvider.currentUserRequestedRole} Anda telah ditolak oleh admin.';
+                    backgroundColor = Colors.red.shade100;
+                    icon = Icons.error_outline;
+                  }
+
+                  return Card(
+                    margin: const EdgeInsets.all(8.0),
+                    color: backgroundColor,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Icon(icon, color: Theme.of(context).colorScheme.onSurface),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              message,
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  // Tab Jadwal
+                  _buildJadwalTab(jadwalList),
+                  // Tab Nilai
+                  _buildNilaiTab(nilaiList),
+                  // Tab Pengumuman
+                  _buildPengumumanTab(),
+                ],
+              ),
+            ),
           ],
         ),
       ),

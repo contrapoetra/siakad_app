@@ -120,7 +120,7 @@ Future<void> _initializeDummyData() async {
   // Add dummy users if empty
   if (userBox.isEmpty) {
     await userBox.add(User(username: 'admin', password: 'admin123', role: 'Admin'));
-    await userBox.add(User(username: 'guru', password: 'guru123', role: 'Guru'));
+    await userBox.add(User(username: 'guru', password: 'guru123', role: 'Siswa', requestedRole: 'Guru', requestStatus: 'pending'));
     // Use NIS for siswa username for consistency, or nama if that's what's expected for login
     // For now, using nama as it's in the current AuthProvider
     await userBox.add(User(username: 'Ahmad Rizki', password: 'siswa123', role: 'Siswa'));

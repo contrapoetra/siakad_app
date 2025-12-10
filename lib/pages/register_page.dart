@@ -4,17 +4,18 @@ import '../providers/auth_provider.dart';
 import '../widgets/custom_input.dart';
 import '../routes.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  String _selectedRole = 'Siswa';
   bool _isLoading = false;
 
   @override
@@ -24,16 +25,17 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.login(
+      final success = await authProvider.register(
         _usernameController.text,
         _passwordController.text,
+        _selectedRole,
       );
 
       setState(() {
@@ -41,20 +43,17 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       if (success && mounted) {
-        final role = authProvider.currentRole;
-        String route = AppRoutes.adminDashboard;
-
-        if (role == 'Guru') {
-          route = AppRoutes.guruDashboard;
-        } else if (role == 'Siswa') {
-          route = AppRoutes.siswaDashboard;
-        }
-
-        Navigator.of(context).pushReplacementNamed(route);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registrasi berhasil! Silakan login.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pushReplacementNamed(AppRoutes.login);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Username atau password salah!'),
+            content: const Text('Registrasi gagal. Username mungkin sudah ada.'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -65,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: Theme.of(context).colorScheme.onPrimary,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -76,26 +75,16 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.school, size: 100, color: Theme.of(context).colorScheme.primary),
+                  Icon(Icons.person_add, size: 100, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(height: 24),
                   Text(
-                    'SIAKAD SEKOLAH',
+                    'DAFTAR AKUN BARU',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
                       letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sistem Informasi Akademik',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 48),
@@ -118,23 +107,49 @@ class _LoginPageState extends State<LoginPage> {
                       if (value == null || value.isEmpty) {
                         return 'Password tidak boleh kosong';
                       }
+                      if (value.length < 6) {
+                        return 'Password minimal 6 karakter';
+                      }
                       return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _selectedRole,
+                    decoration: InputDecoration(
+                      labelText: 'Daftar Sebagai',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    items: <String>['Siswa', 'Guru', 'Admin'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedRole = newValue!;
+                      });
                     },
                   ),
                   const SizedBox(height: 32),
                   _isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : SizedBox(
-                          height: 56, // Taller button for fullscreen look
+                          height: 56,
                           child: ElevatedButton(
-                            onPressed: _login,
+                            onPressed: _register,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary, // Primary button
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                               foregroundColor: Theme.of(context).colorScheme.onPrimary,
                               elevation: 0,
                             ),
                             child: Text(
-                              'LOGIN',
+                              'DAFTAR',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -148,40 +163,14 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Belum punya akun?'),
+                      const Text('Sudah punya akun?'),
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacementNamed(AppRoutes.register);
+                          Navigator.of(context).pushReplacementNamed(AppRoutes.login);
                         },
-                        child: const Text('Daftar di sini'),
+                        child: const Text('Login di sini'),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      border: Border.all(color: Theme.of(context).colorScheme.tertiary, width: 1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Dummy Login Credentials:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text('Admin: admin / admin123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                        Text('Guru: guru / guru123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                        Text('Siswa: Ahmad Rizki / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                        Text('Siswa: Siti Nurhaliza / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                        Text('Siswa: Abbiyi QS / siswa123', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                      ],
-                    ),
                   ),
                 ],
               ),

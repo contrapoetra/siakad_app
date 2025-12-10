@@ -130,6 +130,15 @@ class AdminDashboard extends StatelessWidget {
                       Navigator.pushNamed(context, AppRoutes.pengumuman);
                     },
                   ),
+                  _buildMenuCard(
+                    context,
+                    icon: Icons.person_add,
+                    title: 'Permintaan Role',
+                    color: Theme.of(context).colorScheme.primary,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.roleRequest);
+                    },
+                  ),
                 ],
               ),
             ),

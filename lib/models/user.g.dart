@@ -20,19 +20,25 @@ class UserAdapter extends TypeAdapter<User> {
       username: fields[0] as String,
       password: fields[1] as String,
       role: fields[2] as String,
+      requestedRole: fields[3] as String?,
+      requestStatus: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, User obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.username)
       ..writeByte(1)
       ..write(obj.password)
       ..writeByte(2)
-      ..write(obj.role);
+      ..write(obj.role)
+      ..writeByte(3)
+      ..write(obj.requestedRole)
+      ..writeByte(4)
+      ..write(obj.requestStatus);
   }
 
   @override

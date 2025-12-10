@@ -8,6 +8,8 @@ import 'pages/guru_crud.dart';
 import 'pages/jadwal_crud.dart';
 import 'pages/nilai_input.dart';
 import 'pages/pengumuman_page.dart';
+import 'pages/role_request_page.dart';
+import 'pages/register_page.dart'; // Import the new page
 
 class AppRoutes {
   static const String login = '/';
@@ -19,6 +21,8 @@ class AppRoutes {
   static const String jadwalCrud = '/jadwal-crud';
   static const String nilaiInput = '/nilai-input';
   static const String pengumuman = '/pengumuman';
+  static const String roleRequest = '/role-request';
+  static const String register = '/register'; // New route
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -31,6 +35,8 @@ class AppRoutes {
       jadwalCrud: (context) => const JadwalCrudPage(),
       nilaiInput: (context) => const NilaiInputPage(),
       pengumuman: (context) => const PengumumanPage(),
+      roleRequest: (context) => const RoleRequestPage(),
+      register: (context) => const RegisterPage(), // Map the new page
     };
   }
 }
