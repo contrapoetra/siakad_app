@@ -10,6 +10,7 @@ import 'providers/jadwal_provider.dart';
 import 'providers/nilai_provider.dart';
 import 'providers/pengumuman_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/kelas_provider.dart';
 import 'services/notification_service.dart'; // Import NotificationService
 
 void main() async {
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NilaiProvider()),
         ChangeNotifierProvider(create: (_) => PengumumanProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => KelasProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

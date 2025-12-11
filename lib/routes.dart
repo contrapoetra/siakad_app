@@ -11,6 +11,7 @@ import 'pages/pengumuman_page.dart';
 import 'pages/role_request_page.dart';
 import 'pages/register_page.dart';
 import 'pages/forgot_password_page.dart'; // Import the new page
+import 'pages/kelas_crud.dart';
 
 class AppRoutes {
   static const String login = '/';
@@ -19,6 +20,7 @@ class AppRoutes {
   static const String siswaDashboard = '/siswa';
   static const String siswaCrud = '/siswa-crud';
   static const String guruCrud = '/guru-crud';
+  static const String kelasCrud = '/kelas-crud';
   static const String jadwalCrud = '/jadwal-crud';
   static const String nilaiInput = '/nilai-input';
   static const String pengumuman = '/pengumuman';
@@ -34,6 +36,7 @@ class AppRoutes {
       siswaDashboard: (context) => const SiswaDashboard(),
       siswaCrud: (context) => const SiswaCrudPage(),
       guruCrud: (context) => const GuruCrudPage(),
+      kelasCrud: (context) => const KelasCrudPage(),
       jadwalCrud: (context) => const JadwalCrudPage(),
       nilaiInput: (context) => const NilaiInputPage(),
       pengumuman: (context) => const PengumumanPage(),

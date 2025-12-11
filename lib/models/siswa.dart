@@ -31,6 +31,9 @@ class Siswa extends HiveObject {
   @HiveField(8)
   late String jurusan;
 
+  @HiveField(9)
+  late String? kelasId;
+
   Siswa({
     required this.nis,
     required this.nama,
@@ -41,5 +44,6 @@ class Siswa extends HiveObject {
     required this.namaIbu,
     required this.kelas,
     required this.jurusan,
+    this.kelasId,
   });
 }

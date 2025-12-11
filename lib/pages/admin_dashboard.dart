@@ -115,6 +115,15 @@ class AdminDashboard extends StatelessWidget {
                   ),
                   _buildMenuCard(
                     context,
+                    icon: Icons.class_,
+                    title: 'Data Kelas',
+                    color: Theme.of(context).colorScheme.primary,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.kelasCrud);
+                    },
+                  ),
+                  _buildMenuCard(
+                    context,
                     icon: Icons.schedule,
                     title: 'Jadwal Pelajaran',
                     color: Theme.of(context).colorScheme.primary,

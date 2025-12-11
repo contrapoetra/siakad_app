@@ -26,13 +26,14 @@ class SiswaAdapter extends TypeAdapter<Siswa> {
       namaIbu: fields[6] as String,
       kelas: fields[7] as String,
       jurusan: fields[8] as String,
+      kelasId: fields[9] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Siswa obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.nis)
       ..writeByte(1)
@@ -50,7 +51,9 @@ class SiswaAdapter extends TypeAdapter<Siswa> {
       ..writeByte(7)
       ..write(obj.kelas)
       ..writeByte(8)
-      ..write(obj.jurusan);
+      ..write(obj.jurusan)
+      ..writeByte(9)
+      ..write(obj.kelasId);
   }
 
   @override
