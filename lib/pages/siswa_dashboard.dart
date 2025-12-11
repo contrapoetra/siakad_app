@@ -170,6 +170,15 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                       children: [
                         _buildMenuCard(
                           context,
+                          icon: Icons.announcement,
+                          title: 'Pengumuman',
+                          color: Theme.of(context).colorScheme.primary,
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.pengumuman);
+                          },
+                        ),
+                        _buildMenuCard(
+                          context,
                           icon: Icons.assignment_turned_in,
                           title: 'Rapor Saya',
                           color: Theme.of(context).colorScheme.primary,

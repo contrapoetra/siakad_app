@@ -159,6 +159,17 @@ class _GuruDashboardState extends State<GuruDashboard> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  // Add Pengumuman button for Guru
+                  _buildMenuCard(
+                    context,
+                    icon: Icons.announcement,
+                    title: 'Pengumuman',
+                    color: Theme.of(context).colorScheme.primary,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.pengumuman);
+                    },
+                  ),
+                  const SizedBox(height: 24),
                   const Text(
                     'Kelas yang Anda Ajar',
                     style: TextStyle(
@@ -191,6 +202,42 @@ class _GuruDashboardState extends State<GuruDashboard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMenuCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 0,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.zero,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 50,
+              color: color,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

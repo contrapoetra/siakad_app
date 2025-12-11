@@ -287,7 +287,7 @@ class DummyDataService {
       // Assign grades for some of the subjects in their class
       for (var mapel in kelas.mataPelajaranList) {
         // Only generate grades for 60% of subjects for a bit of realism
-        if (random.nextDouble() < 0.6) {
+        // if (random.nextDouble() < 0.6) { // <--- This is the key condition
           final nilaiTugas = (60 + random.nextInt(40)).toDouble(); // 60-99
           final nilaiUTS = (60 + random.nextInt(40)).toDouble();
           final nilaiUAS = (60 + random.nextInt(40)).toDouble();
@@ -300,7 +300,7 @@ class DummyDataService {
             nilaiUTS: nilaiUTS,
             nilaiUAS: nilaiUAS,
           ));
-        }
+        // }
       }
     }
     await nilaiBox.addAll(dummyNilai);
