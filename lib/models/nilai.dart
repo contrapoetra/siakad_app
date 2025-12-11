@@ -15,15 +15,18 @@ class Nilai extends HiveObject {
   late String mataPelajaran;
 
   @HiveField(3)
-  late double nilaiTugas;
+  late String semester; // New field for semester
 
   @HiveField(4)
-  late double nilaiUTS;
+  late double nilaiTugas;
 
   @HiveField(5)
+  late double nilaiUTS;
+
+  @HiveField(6)
   late double nilaiUAS;
 
-  @HiveField(6) // Add new HiveField for ID
+  @HiveField(7) // Update HiveField index
   late String id; // Unique ID
 
   Nilai({
@@ -31,6 +34,7 @@ class Nilai extends HiveObject {
     required this.nis,
     required this.namaSiswa,
     required this.mataPelajaran,
+    required this.semester, // Add semester to constructor
     required this.nilaiTugas,
     required this.nilaiUTS,
     required this.nilaiUAS,

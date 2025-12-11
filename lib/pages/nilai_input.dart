@@ -36,6 +36,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
 
     String? selectedNis = nilai?.nis;
     String? selectedMataPelajaran = nilai?.mataPelajaran;
+    String? selectedSemester = nilai?.semester ?? 'Semester 1'; // New: Selected Semester
     final tugasController = TextEditingController(
         text: nilai?.nilaiTugas.toString() ?? '');
     final utsController = TextEditingController(
@@ -52,6 +53,8 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
         }
       }
     }
+
+    final List<String> semesterOptions = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6'];
 
 
     showDialog(
@@ -129,6 +132,33 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: selectedSemester,
+                      decoration: InputDecoration(
+                        labelText: 'Pilih Semester',
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ),
+                      items: semesterOptions.map((semester) {
+                        return DropdownMenuItem(
+                          value: semester,
+                          child: Text(semester),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          selectedSemester = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Semester harus dipilih';
+                        }
+                        return null;
+                      },
+                    ),
                     CustomInput(
                       label: 'Nilai Tugas (0-100)',
                       controller: tugasController,
@@ -195,6 +225,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                         nis: selectedNis!,
                         namaSiswa: siswa?.nama ?? '',
                         mataPelajaran: selectedMataPelajaran!,
+                        semester: selectedSemester!, // New: Add semester
                         nilaiTugas: double.parse(tugasController.text),
                         nilaiUTS: double.parse(utsController.text),
                         nilaiUAS: double.parse(uasController.text),
@@ -205,6 +236,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                         final existingIndex = provider.getNilaiIndex(
                           selectedNis!,
                           selectedMataPelajaran!,
+                          selectedSemester! // New: Pass semester
                         );
                         if (existingIndex != null) {
                           await provider.updateNilai(existingIndex, newNilai);

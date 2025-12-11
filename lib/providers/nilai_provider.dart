@@ -40,7 +40,7 @@ class NilaiProvider with ChangeNotifier {
     return _service.getNilaiAt(index);
   }
 
-  int? getNilaiIndex(String nis, String mataPelajaran) {
-    return _service.getNilaiIndex(nis, mataPelajaran);
+  int? getNilaiIndex(String nis, String mataPelajaran, String semester) {
+    return _service.getNilaiIndex(nis, mataPelajaran, semester);
   }
 }

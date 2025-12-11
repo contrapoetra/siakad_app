@@ -37,11 +37,11 @@ class NilaiService {
     return null;
   }
 
-  // Cek apakah nilai sudah ada untuk siswa dan mata pelajaran tertentu
-  int? getNilaiIndex(String nis, String mataPelajaran) {
+  // Cek apakah nilai sudah ada untuk siswa, mata pelajaran, dan semester tertentu
+  int? getNilaiIndex(String nis, String mataPelajaran, String semester) {
     for (int i = 0; i < _box.length; i++) {
       final nilai = _box.getAt(i);
-      if (nilai?.nis == nis && nilai?.mataPelajaran == mataPelajaran) {
+      if (nilai?.nis == nis && nilai?.mataPelajaran == mataPelajaran && nilai?.semester == semester) {
         return i;
       }
     }

@@ -278,6 +278,7 @@ class DummyDataService {
     // 8. Generate Dummy Nilai (Grades)
     final List<Nilai> dummyNilai = [];
     final random = Random();
+    final List<String> semesterOptions = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6'];
 
     // Iterate through a subset of students and subjects to create grades
     for (var siswa in dummySiswa) {
@@ -291,11 +292,13 @@ class DummyDataService {
           final nilaiTugas = (60 + random.nextInt(40)).toDouble(); // 60-99
           final nilaiUTS = (60 + random.nextInt(40)).toDouble();
           final nilaiUAS = (60 + random.nextInt(40)).toDouble();
+          final semester = semesterOptions[random.nextInt(semesterOptions.length)]; // Random semester
 
           dummyNilai.add(Nilai(
             nis: siswa.nis,
             namaSiswa: siswa.nama,
             mataPelajaran: mapel.nama,
+            semester: semester, // New: Add semester
             nilaiTugas: nilaiTugas,
             nilaiUTS: nilaiUTS,
             nilaiUAS: nilaiUAS,

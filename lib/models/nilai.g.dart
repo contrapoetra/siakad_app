@@ -17,20 +17,21 @@ class NilaiAdapter extends TypeAdapter<Nilai> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Nilai(
-      id: fields[6] as String?,
+      id: fields[7] as String?,
       nis: fields[0] as String,
       namaSiswa: fields[1] as String,
       mataPelajaran: fields[2] as String,
-      nilaiTugas: fields[3] as double,
-      nilaiUTS: fields[4] as double,
-      nilaiUAS: fields[5] as double,
+      semester: fields[3] as String,
+      nilaiTugas: fields[4] as double,
+      nilaiUTS: fields[5] as double,
+      nilaiUAS: fields[6] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, Nilai obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.nis)
       ..writeByte(1)
@@ -38,12 +39,14 @@ class NilaiAdapter extends TypeAdapter<Nilai> {
       ..writeByte(2)
       ..write(obj.mataPelajaran)
       ..writeByte(3)
-      ..write(obj.nilaiTugas)
+      ..write(obj.semester)
       ..writeByte(4)
-      ..write(obj.nilaiUTS)
+      ..write(obj.nilaiTugas)
       ..writeByte(5)
-      ..write(obj.nilaiUAS)
+      ..write(obj.nilaiUTS)
       ..writeByte(6)
+      ..write(obj.nilaiUAS)
+      ..writeByte(7)
       ..write(obj.id);
   }
 
