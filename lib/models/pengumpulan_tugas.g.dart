@@ -1,53 +1,53 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'jadwal.dart';
+part of 'pengumpulan_tugas.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class JadwalAdapter extends TypeAdapter<Jadwal> {
+class PengumpulanTugasAdapter extends TypeAdapter<PengumpulanTugas> {
   @override
-  final int typeId = 2;
+  final int typeId = 12;
 
   @override
-  Jadwal read(BinaryReader reader) {
+  PengumpulanTugas read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Jadwal(
+    return PengumpulanTugas(
       id: fields[0] as String,
-      hari: fields[1] as String,
-      jam: fields[2] as String,
-      mataPelajaran: fields[3] as String,
-      guruPengampu: fields[4] as String,
-      kelas: fields[5] as String,
-      kelasId: fields[6] as String,
-      mapelId: fields[7] as String,
+      tugasId: fields[1] as String,
+      siswaNis: fields[2] as String,
+      content: fields[3] as String?,
+      fileUrl: fields[4] as String?,
+      nilai: fields[5] as double?,
+      feedback: fields[6] as String?,
+      submittedAt: fields[7] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Jadwal obj) {
+  void write(BinaryWriter writer, PengumpulanTugas obj) {
     writer
       ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.hari)
+      ..write(obj.tugasId)
       ..writeByte(2)
-      ..write(obj.jam)
+      ..write(obj.siswaNis)
       ..writeByte(3)
-      ..write(obj.mataPelajaran)
+      ..write(obj.content)
       ..writeByte(4)
-      ..write(obj.guruPengampu)
+      ..write(obj.fileUrl)
       ..writeByte(5)
-      ..write(obj.kelas)
+      ..write(obj.nilai)
       ..writeByte(6)
-      ..write(obj.kelasId)
+      ..write(obj.feedback)
       ..writeByte(7)
-      ..write(obj.mapelId);
+      ..write(obj.submittedAt);
   }
 
   @override
@@ -56,7 +56,7 @@ class JadwalAdapter extends TypeAdapter<Jadwal> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is JadwalAdapter &&
+      other is PengumpulanTugasAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

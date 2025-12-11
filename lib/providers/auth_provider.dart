@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import '../models/user.dart';
 import '../models/siswa.dart'; // Import Siswa model
 import '../models/guru.dart'; // Import Guru model
+import '../services/auth_service.dart'; // Add this import
 
 class AuthProvider with ChangeNotifier {
   String? _currentRole;
@@ -12,6 +13,8 @@ class AuthProvider with ChangeNotifier {
   String? _currentUserRequestStatus;
   User? _currentUser; // Added to hold the current logged in user object
 
+  final AuthService _authService = AuthService(); // Add instance of AuthService
+
   String? get currentRole => _currentRole;
   String? get currentUsername => _currentUsername;
   String? get currentUserId => _currentUserId;
@@ -20,6 +23,53 @@ class AuthProvider with ChangeNotifier {
   User? get currentUser => _currentUser;
 
   bool get isLoggedIn => _currentRole != null;
+
+  AuthProvider() {
+    _loadSession(); // Call method to load session on initialization
+  }
+
+  Future<void> _loadSession() async {
+    final session = await _authService.loadSession();
+    final userId = session['userId'];
+    final role = session['role'];
+
+    if (userId != null && role != null) {
+      _currentUserId = userId;
+      _currentRole = role;
+
+      // Re-populate other details like username and currentUser from Hive if needed
+      // This is a simplified approach, a full user object would be better stored/retrieved
+      final userBox = Hive.box<User>('users');
+      final user = userBox.values.firstWhere(
+        (u) => u.nomorInduk == userId,
+        orElse: () => User(nomorInduk: '', password: '', role: '') // Fallback
+      );
+
+      if (user.nomorInduk.isNotEmpty) {
+        _currentUser = user;
+        _currentUserRequestedRole = user.requestedRole;
+        _currentUserRequestStatus = user.requestStatus;
+        
+        // Try to get actual name from Siswa/Guru models
+        String? actualName;
+        if (user.isSiswa) {
+          final siswaBox = Hive.box<Siswa>('siswa');
+          final siswa = siswaBox.values.firstWhere((s) => s.nis == user.nomorInduk, orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: '', namaAyah: '', namaIbu: ''));
+          if (siswa.nis.isNotEmpty) {
+            actualName = siswa.nama;
+          }
+        } else if (user.isGuru) {
+          final guruBox = Hive.box<Guru>('guru');
+          final guru = guruBox.values.firstWhere((g) => g.nip == user.nomorInduk, orElse: () => Guru(nip: '', nama: '', gelar: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: ''));
+          if (guru.nip.isNotEmpty) {
+            actualName = guru.nama;
+          }
+        }
+        _currentUsername = actualName ?? user.nomorInduk;
+      }
+      notifyListeners();
+    }
+  }
 
   Future<bool> register(String nomorInduk, String password, String desiredRole, {String? email}) async {
     final userBox = Hive.box<User>('users');
@@ -89,8 +139,10 @@ class AuthProvider with ChangeNotifier {
         }
       }
 
-      _currentUsername = actualName ?? user.nomorInduk; // Fallback to nomorInduk if name not found
+      _currentUsername = actualName ?? user.nomorInduk;
       
+      await _authService.saveSession(_currentUserId!, _currentRole!); // Save session
+
       notifyListeners();
       return true;
     }
@@ -98,12 +150,13 @@ class AuthProvider with ChangeNotifier {
   }
 
   void logout() {
+    _authService.clearSession(); // Clear session
     _currentRole = null;
     _currentUsername = null;
     _currentUserId = null;
     _currentUserRequestedRole = null;
     _currentUserRequestStatus = null;
-    _currentUser = null; // Clear the current user object
+    _currentUser = null;
     notifyListeners();
   }
 

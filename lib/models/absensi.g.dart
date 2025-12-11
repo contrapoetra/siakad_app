@@ -1,50 +1,44 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'nilai.dart';
+part of 'absensi.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class NilaiAdapter extends TypeAdapter<Nilai> {
+class AbsensiAdapter extends TypeAdapter<Absensi> {
   @override
-  final int typeId = 3;
+  final int typeId = 10;
 
   @override
-  Nilai read(BinaryReader reader) {
+  Absensi read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Nilai(
-      id: fields[6] as String?,
-      nis: fields[0] as String,
-      namaSiswa: fields[1] as String,
-      mataPelajaran: fields[2] as String,
-      nilaiTugas: fields[3] as double,
-      nilaiUTS: fields[4] as double,
-      nilaiUAS: fields[5] as double,
+    return Absensi(
+      id: fields[0] as String,
+      kelasId: fields[1] as String,
+      mataPelajaranId: fields[2] as String,
+      tanggal: fields[3] as DateTime,
+      dataKehadiran: (fields[4] as Map).cast<String, String>(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, Nilai obj) {
+  void write(BinaryWriter writer, Absensi obj) {
     writer
-      ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.nis)
-      ..writeByte(1)
-      ..write(obj.namaSiswa)
-      ..writeByte(2)
-      ..write(obj.mataPelajaran)
-      ..writeByte(3)
-      ..write(obj.nilaiTugas)
-      ..writeByte(4)
-      ..write(obj.nilaiUTS)
       ..writeByte(5)
-      ..write(obj.nilaiUAS)
-      ..writeByte(6)
-      ..write(obj.id);
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.kelasId)
+      ..writeByte(2)
+      ..write(obj.mataPelajaranId)
+      ..writeByte(3)
+      ..write(obj.tanggal)
+      ..writeByte(4)
+      ..write(obj.dataKehadiran);
   }
 
   @override
@@ -53,7 +47,7 @@ class NilaiAdapter extends TypeAdapter<Nilai> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is NilaiAdapter &&
+      other is AbsensiAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

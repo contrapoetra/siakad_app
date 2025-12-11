@@ -65,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background, // Fixed background color
+      backgroundColor: Theme.of(context).colorScheme.surface, // Use surface color
       body: Stack(
         children: [
           SafeArea(
@@ -189,7 +189,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 return IconButton(
                   icon: Icon(
                     themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                    color: Theme.of(context).colorScheme.onBackground,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   onPressed: () {
                     themeProvider.toggleTheme();

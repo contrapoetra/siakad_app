@@ -2,14 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
+import '../providers/guru_provider.dart';
+import '../providers/kelas_provider.dart';
+import '../models/kelas.dart';
 import '../routes.dart';
+import 'classroom_page.dart'; // Import ClassroomPage
 
-class GuruDashboard extends StatelessWidget {
+class GuruDashboard extends StatefulWidget {
   const GuruDashboard({super.key});
+
+  @override
+  State<GuruDashboard> createState() => _GuruDashboardState();
+}
+
+class _GuruDashboardState extends State<GuruDashboard> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<GuruProvider>(context, listen: false).loadGuru();
+      Provider.of<KelasProvider>(context, listen: false).fetchKelas();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final guruProvider = Provider.of<GuruProvider>(context);
+    final kelasProvider = Provider.of<KelasProvider>(context);
+
+    final currentGuruNip = authProvider.currentUserId;
+    final currentGuru = currentGuruNip != null
+        ? guruProvider.guruList.firstWhere((g) => g.nip == currentGuruNip)
+        : null;
+
+    // Get all unique subjects taught by this guru across all classes
+    final List<Map<String, dynamic>> guruSubjects = []; // {kelas, mataPelajaran}
+    for (var kelas in kelasProvider.kelasList) {
+      for (var mapel in kelas.mataPelajaranList) {
+        if (mapel.guruNip == currentGuruNip) {
+          guruSubjects.add({'kelas': kelas, 'mataPelajaran': mapel});
+        }
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -105,7 +140,7 @@ class GuruDashboard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Selamat Datang, ${authProvider.currentUsername}',
+                                'Selamat Datang, ${currentGuru?.nama ?? authProvider.currentUsername}',
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -115,9 +150,8 @@ class GuruDashboard extends StatelessWidget {
                                 'Role: ${authProvider.currentRole}',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                ),
-                              ),
+                                  color: Theme.of(context).colorScheme.onSurface.withAlpha(178),
+                                ),                              ),
                             ],
                           ),
                         ],
@@ -126,7 +160,7 @@ class GuruDashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Menu Guru',
+                    'Kelas yang Anda Ajar',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -134,40 +168,23 @@ class GuruDashboard extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      children: [
-                        _buildMenuCard(
-                          context,
-                          icon: Icons.grade,
-                          title: 'Input Nilai',
-                          color: Theme.of(context).colorScheme.primary,
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.nilaiInput);
-                          },
-                        ),
-                        _buildMenuCard(
-                          context,
-                          icon: Icons.schedule,
-                          title: 'Jadwal Pelajaran',
-                          color: Theme.of(context).colorScheme.primary,
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.jadwalCrud);
-                          },
-                        ),
-                        _buildMenuCard(
-                          context,
-                          icon: Icons.announcement,
-                          title: 'Pengumuman',
-                          color: Theme.of(context).colorScheme.primary,
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.pengumuman);
-                          },
-                        ),
-                      ],
-                    ),
+                    child: guruSubjects.isEmpty
+                        ? const Center(child: Text('Anda belum mengajar kelas apapun.'))
+                        : GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 3 / 2, // Adjust as needed
+                            ),
+                            itemCount: guruSubjects.length,
+                            itemBuilder: (context, index) {
+                              final subject = guruSubjects[index];
+                              final kelas = subject['kelas'] as Kelas;
+                              final mapel = subject['mataPelajaran'] as MataPelajaran;
+                              return _buildSubjectCard(context, kelas, mapel);
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -178,34 +195,53 @@ class GuruDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildSubjectCard(BuildContext context, Kelas kelas, MataPelajaran mapel) {
     return Card(
       elevation: 0,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.zero,
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.classroomPage,
+            arguments: ClassroomPageArgs(kelas: kelas, mataPelajaran: mapel),
+          );
+        },
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 50,
-              color: color,
+            Container(
+              height: 80,
+              width: double.infinity,
+              color: Theme.of(context).colorScheme.primary,
+              alignment: Alignment.center,
+              child: Text(
+                mapel.nama,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+            Expanded( // Wrap in Expanded
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Kelas: ${kelas.nama}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  overflow: TextOverflow.ellipsis, // Add overflow handling
+                ),
+              ),
+            ),
+            Expanded( // Wrap in Expanded
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'Guru: ${mapel.guruNama}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  overflow: TextOverflow.ellipsis, // Add overflow handling
+                ),
               ),
             ),
           ],

@@ -12,6 +12,7 @@ import 'pages/role_request_page.dart';
 import 'pages/register_page.dart';
 import 'pages/forgot_password_page.dart'; // Import the new page
 import 'pages/kelas_crud.dart';
+import 'pages/classroom_page.dart'; // Import the new page
 
 class AppRoutes {
   static const String login = '/';
@@ -27,6 +28,7 @@ class AppRoutes {
   static const String roleRequest = '/role-request';
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password'; // New route
+  static const String classroomPage = '/classroom';
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -43,6 +45,10 @@ class AppRoutes {
       roleRequest: (context) => const RoleRequestPage(),
       register: (context) => const RegisterPage(),
       forgotPassword: (context) => const ForgotPasswordPage(), // Map the new page
+      classroomPage: (context) {
+        final args = ModalRoute.of(context)!.settings.arguments as ClassroomPageArgs;
+        return ClassroomPage(kelas: args.kelas, mataPelajaran: args.mataPelajaran);
+      },
     };
   }
 }

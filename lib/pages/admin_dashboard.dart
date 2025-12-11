@@ -71,9 +71,8 @@ class AdminDashboard extends StatelessWidget {
                           'Role: ${authProvider.currentRole}',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                        ),
+                            color: Theme.of(context).colorScheme.onSurface.withAlpha(178), // Changed from withOpacity
+                          ),                        ),
                       ],
                     ),
                   ],

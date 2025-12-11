@@ -6,6 +6,10 @@ import 'models/nilai.dart';
 import 'models/pengumuman.dart';
 import 'models/user.dart';
 import 'models/kelas.dart';
+import 'models/tugas.dart';
+import 'models/absensi.dart';
+import 'models/materi.dart';
+import 'models/pengumpulan_tugas.dart';
 
 Future<void> initHive() async {
   await Hive.initFlutter();
@@ -20,6 +24,10 @@ Future<void> initHive() async {
   Hive.registerAdapter(UserAdapter());
   Hive.registerAdapter(KelasAdapter());
   Hive.registerAdapter(MataPelajaranAdapter());
+  Hive.registerAdapter(TugasAdapter());
+  Hive.registerAdapter(AbsensiAdapter());
+  Hive.registerAdapter(MateriAdapter());
+  Hive.registerAdapter(PengumpulanTugasAdapter());
 
   // Open Boxes
   await Hive.openBox<Siswa>('siswa');
@@ -29,6 +37,10 @@ Future<void> initHive() async {
   await Hive.openBox<Pengumuman>('pengumuman');
   await Hive.openBox<User>('users'); // Open the users box
   await Hive.openBox<Kelas>('kelas');
+  await Hive.openBox<Tugas>('tugas');
+  await Hive.openBox<Absensi>('absensi');
+  await Hive.openBox<Materi>('materi');
+  await Hive.openBox<PengumpulanTugas>('submissions');
 
   // Ensure initial admin user exists if userBox is empty
   final userBox = Hive.box<User>('users');

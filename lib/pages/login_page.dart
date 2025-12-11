@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
       body: Stack(
         children: [
           SafeArea(
@@ -110,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -196,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                 return IconButton(
                   icon: Icon(
                     themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                    color: Theme.of(context).colorScheme.onBackground,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   onPressed: () {
                     themeProvider.toggleTheme();

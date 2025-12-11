@@ -44,7 +44,7 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -198,6 +198,7 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
                         namaIbu: namaIbuController.text,
                         kelas: kelasController.text,
                         jurusan: jurusanController.text,
+                        kelasId: siswa?.kelasId,
                       );
 
                       if (index == null) {
@@ -206,19 +207,18 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
                         await provider.updateSiswa(index, newSiswa);
                       }
 
-                      if (mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              siswa == null
-                                  ? 'Siswa berhasil ditambahkan'
-                                  : 'Siswa berhasil diupdate',
-                            ),
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            siswa == null
+                                ? 'Siswa berhasil ditambahkan'
+                                : 'Siswa berhasil diupdate',
                           ),
-                        );
-                      }
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                        ),
+                      );
                     }
                   },
                   child: const Text('Simpan'),
@@ -240,7 +240,7 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -256,15 +256,14 @@ class _SiswaCrudPageState extends State<SiswaCrudPage> {
                   onPressed: () async {
                     final provider = Provider.of<SiswaProvider>(context, listen: false);
                     await provider.deleteSiswa(index);
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Siswa berhasil dihapus'),
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                        ),
-                      );
-                    }
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Siswa berhasil dihapus'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: const Text('Hapus'),

@@ -11,6 +11,10 @@ import 'providers/nilai_provider.dart';
 import 'providers/pengumuman_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/kelas_provider.dart';
+import 'providers/tugas_provider.dart';
+import 'providers/absensi_provider.dart';
+import 'providers/materi_provider.dart'; // Import MateriProvider
+import 'providers/submission_provider.dart'; // Import SubmissionProvider
 import 'services/notification_service.dart'; // Import NotificationService
 
 void main() async {
@@ -35,6 +39,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PengumumanProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => KelasProvider()),
+        ChangeNotifierProvider(create: (_) => TugasProvider()),
+        ChangeNotifierProvider(create: (_) => AbsensiProvider()),
+        ChangeNotifierProvider(create: (_) => MateriProvider()), // Add MateriProvider
+        ChangeNotifierProvider(create: (_) => SubmissionProvider()), // Add SubmissionProvider
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -52,29 +60,28 @@ class MyApp extends StatelessWidget {
                 onSecondary: Colors.white, // White text on secondary
                 tertiary: const Color(0xFFE1E4E8), // Light grey for subtle borders/dividers
                 surface: Colors.white, // White background for surfaces
-                background: Colors.white, // White background
+                surfaceTint: Colors.white, // Use surfaceTint instead of background for clarity
                 onSurface: const Color(0xFF24292E), // Dark grey text on surfaces
                 error: const Color(0xFFCB2431), // GitHub red for errors
               ),
               useMaterial3: false,
               textTheme: GoogleFonts.interTextTheme(), // Using Inter font for GitHub feel
               scaffoldBackgroundColor: Colors.white,
-              appBarTheme: AppBarTheme(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF24292E),
-                elevation: 0,
-                centerTitle: false,
-                titleTextStyle: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF24292E),
-                  letterSpacing: 0.5,
-                ),
-                surfaceTintColor: Colors.transparent,
-                iconTheme: const IconThemeData(color: Color(0xFF24292E)),
-                shape: const Border(bottom: BorderSide(color: Color(0xFFE1E4E8), width: 1)),
-              ),
-              inputDecorationTheme: InputDecorationTheme(
+                          appBarTheme: AppBarTheme(
+                            backgroundColor: Theme.of(context).colorScheme.surface, // Use surface color for app bar
+                            foregroundColor: const Color(0xFF24292E),
+                            elevation: 0,
+                            centerTitle: false,
+                            titleTextStyle: GoogleFonts.inter(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF24292E),
+                              letterSpacing: 0.5,
+                            ),
+                            surfaceTintColor: Colors.transparent, // Use surfaceTintColor
+                            iconTheme: const IconThemeData(color: Color(0xFF24292E)),
+                            shape: const Border(bottom: BorderSide(color: Color(0xFFE1E4E8), width: 1)),
+                          ),              inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: const Color(0xFFF6F8FA), // Light grey fill
                 border: OutlineInputBorder(
@@ -215,7 +222,7 @@ class MyApp extends StatelessWidget {
                 onSecondary: Colors.white, // White text on secondary
                 tertiary: const Color(0xFF30363D), // Medium grey for subtle borders/dividers
                 surface: const Color(0xFF161B22), // Darker grey for surfaces
-                background: const Color(0xFF0D1117), // GitHub dark background
+                surfaceTint: const Color(0xFF0D1117), // Use surfaceTint instead of background
                 onSurface: const Color(0xFFC9D1D9), // Light grey text on surfaces
                 error: const Color(0xFFFA4549), // GitHub red for errors
               ),

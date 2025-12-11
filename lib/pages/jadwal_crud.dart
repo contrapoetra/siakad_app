@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../models/jadwal.dart';
+import '../models/kelas.dart'; // Import Kelas
 import '../providers/jadwal_provider.dart';
+import '../providers/kelas_provider.dart'; // Import KelasProvider
 import '../widgets/custom_input.dart';
 import '../widgets/empty_state.dart';
 
@@ -19,6 +21,7 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<JadwalProvider>(context, listen: false).loadJadwal();
+      Provider.of<KelasProvider>(context, listen: false).fetchKelas(); // Load Kelas for dropdown
     });
   }
 
@@ -26,9 +29,15 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
     final formKey = GlobalKey<FormState>();
     final hariController = TextEditingController(text: jadwal?.hari ?? '');
     final jamController = TextEditingController(text: jadwal?.jam ?? '');
-    final mataPelajaranController = TextEditingController(text: jadwal?.mataPelajaran ?? '');
-    final guruPengampuController = TextEditingController(text: jadwal?.guruPengampu ?? '');
-    final kelasController = TextEditingController(text: jadwal?.kelas ?? '');
+    Kelas? selectedKelas;
+    MataPelajaran? selectedMataPelajaran;
+    
+    if (jadwal != null) {
+      final kelasProvider = Provider.of<KelasProvider>(context, listen: false);
+      selectedKelas = kelasProvider.kelasList.firstWhere((k) => k.id == jadwal.kelasId);
+      selectedMataPelajaran = selectedKelas.mataPelajaranList.firstWhere((mp) => mp.id == jadwal.mapelId);
+    }
+
 
     showDialog(
       context: context,
@@ -38,7 +47,7 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -70,32 +79,40 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
                     return null;
                   },
                 ),
-                CustomInput(
-                  label: 'Mata Pelajaran',
-                  controller: mataPelajaranController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Mata Pelajaran tidak boleh kosong';
-                    }
-                    return null;
+                DropdownButtonFormField<Kelas>(
+                  decoration: const InputDecoration(labelText: 'Pilih Kelas'),
+                  initialValue: selectedKelas,
+                  items: Provider.of<KelasProvider>(context).kelasList.map((k) {
+                    return DropdownMenuItem(value: k, child: Text(k.nama));
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedKelas = value;
+                      selectedMataPelajaran = null; // Reset subject when class changes
+                    });
                   },
-                ),
-                CustomInput(
-                  label: 'Guru Pengampu',
-                  controller: guruPengampuController,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Guru Pengampu tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-                CustomInput(
-                  label: 'Kelas',
-                  controller: kelasController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
+                    if (value == null) {
                       return 'Kelas tidak boleh kosong';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<MataPelajaran>(
+                  decoration: const InputDecoration(labelText: 'Pilih Mata Pelajaran'),
+                  initialValue: selectedMataPelajaran,
+                  items: selectedKelas?.mataPelajaranList.map((mp) {
+                    return DropdownMenuItem(value: mp, child: Text(mp.nama));
+                  }).toList() ?? [],
+                  onChanged: selectedKelas == null ? null : (value) {
+                    setState(() {
+                      selectedMataPelajaran = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Mata Pelajaran tidak boleh kosong';
                     }
                     return null;
                   },
@@ -114,11 +131,14 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
                     if (formKey.currentState!.validate()) {
                       final provider = Provider.of<JadwalProvider>(context, listen: false);
                       final newJadwal = Jadwal(
+                        id: jadwal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
                         hari: hariController.text,
                         jam: jamController.text,
-                        mataPelajaran: mataPelajaranController.text,
-                        guruPengampu: guruPengampuController.text,
-                        kelas: kelasController.text,
+                        mataPelajaran: selectedMataPelajaran!.nama,
+                        guruPengampu: selectedMataPelajaran!.guruNama,
+                        kelas: selectedKelas!.nama,
+                        kelasId: selectedKelas!.id,
+                        mapelId: selectedMataPelajaran!.id,
                       );
 
                       if (index == null) {
@@ -127,19 +147,18 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
                         await provider.updateJadwal(index, newJadwal);
                       }
 
-                      if (mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              jadwal == null
-                                  ? 'Jadwal berhasil ditambahkan'
-                                  : 'Jadwal berhasil diupdate',
-                            ),
-                            backgroundColor: Theme.of(context).primaryColor,
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            jadwal == null
+                                ? 'Jadwal berhasil ditambahkan'
+                                : 'Jadwal berhasil diupdate',
                           ),
-                        );
-                      }
+                          backgroundColor: Theme.of(context).primaryColor,
+                        ),
+                      );
                     }
                   },
                   child: const Text('Simpan'),
@@ -161,7 +180,7 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -177,15 +196,14 @@ class _JadwalCrudPageState extends State<JadwalCrudPage> {
                   onPressed: () async {
                     final provider = Provider.of<JadwalProvider>(context, listen: false);
                     await provider.deleteJadwal(index);
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Jadwal berhasil dihapus'),
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                        ),
-                      );
-                    }
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Jadwal berhasil dihapus'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: const Text('Hapus'),

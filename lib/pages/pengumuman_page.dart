@@ -37,7 +37,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -95,19 +95,18 @@ class _PengumumanPageState extends State<PengumumanPage> {
                         await provider.updatePengumuman(index, newPengumuman);
                       }
 
-                      if (mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              pengumuman == null
-                                  ? 'Pengumuman berhasil ditambahkan'
-                                  : 'Pengumuman berhasil diupdate',
-                            ),
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            pengumuman == null
+                                ? 'Pengumuman berhasil ditambahkan'
+                                : 'Pengumuman berhasil diupdate',
                           ),
-                        );
-                      }
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                        ),
+                      );
                     }
                   },
                   child: const Text('Simpan'),
@@ -129,7 +128,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -145,15 +144,14 @@ class _PengumumanPageState extends State<PengumumanPage> {
                   onPressed: () async {
                     final provider = Provider.of<PengumumanProvider>(context, listen: false);
                     await provider.deletePengumuman(index);
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Pengumuman berhasil dihapus'),
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                        ),
-                      );
-                    }
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Pengumuman berhasil dihapus'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: const Text('Hapus'),
@@ -175,7 +173,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -260,17 +258,16 @@ class _PengumumanPageState extends State<PengumumanPage> {
                               ? '${pengumuman.isi.substring(0, 60)}...'
                               : pengumuman.isi,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                            color: Theme.of(context).colorScheme.onSurface.withAlpha(178),
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           DateFormat('dd MMM yyyy').format(pengumuman.tanggal),
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                        ),
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.onSurface.withAlpha(178), // Changed from withOpacity
+                          ),                        ),
                       ],
                     ),
                     isThreeLine: true,

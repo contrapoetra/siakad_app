@@ -48,6 +48,7 @@ class RoleRequestPage extends StatelessWidget {
                                 user.requestedRole!,
                                 'approved',
                               );
+                              if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Permintaan disetujui!')),
                               );
@@ -62,6 +63,7 @@ class RoleRequestPage extends StatelessWidget {
                                 user.role, // Keep current role
                                 'rejected',
                               );
+                              if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Permintaan ditolak!')),
                               );

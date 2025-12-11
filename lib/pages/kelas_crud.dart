@@ -26,6 +26,21 @@ class _KelasCrudPageState extends State<KelasCrudPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manajemen Kelas'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome),
+            tooltip: 'Auto Assign Students & Teachers',
+            onPressed: () async {
+              final kelasProvider = Provider.of<KelasProvider>(context, listen: false);
+              await kelasProvider.autoAssignStudentsAndTeachers(context: context);
+              
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Auto assignment complete!')),
+              );
+            },
+          ),
+        ],
       ),
       body: kelasProvider.kelasList.isEmpty
           ? const EmptyState(icon: Icons.class_, message: 'Belum ada data kelas')

@@ -48,7 +48,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -201,19 +201,18 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                         await provider.updateNilai(index, newNilai);
                       }
 
-                      if (mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              nilai == null
-                                  ? 'Nilai berhasil disimpan'
-                                  : 'Nilai berhasil diupdate',
-                            ),
-                            backgroundColor: Theme.of(context).primaryColor,
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            nilai == null
+                                ? 'Nilai berhasil disimpan'
+                                : 'Nilai berhasil diupdate',
                           ),
-                        );
-                      }
+                          backgroundColor: Theme.of(context).primaryColor,
+                        ),
+                      );
                     }
                   },
                   child: const Text('Simpan'),
@@ -235,7 +234,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.3)),
+              child: Container(color: Colors.black.withAlpha(76)),
             ),
           ),
           Center(
@@ -252,15 +251,14 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                   onPressed: () async {
                     final provider = Provider.of<NilaiProvider>(context, listen: false);
                     await provider.deleteNilai(index);
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Nilai berhasil dihapus'),
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                        ),
-                      );
-                    }
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Nilai berhasil dihapus'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
                   child: const Text('Hapus'),
