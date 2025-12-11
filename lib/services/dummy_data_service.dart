@@ -7,6 +7,8 @@ import '../models/materi.dart';
 import '../models/tugas.dart';
 import '../models/pengumpulan_tugas.dart';
 import '../models/jadwal.dart'; // Import Jadwal model
+import '../models/nilai.dart'; // Import Nilai model
+import 'dart:math'; // Import for Random
 
 class DummyDataService {
   Future<void> generateDummyData() async {
@@ -18,6 +20,7 @@ class DummyDataService {
     final tugasBox = Hive.box<Tugas>('tugas');
     final submissionBox = Hive.box<PengumpulanTugas>('submissions');
     final jadwalBox = Hive.box<Jadwal>('jadwal'); // Access Jadwal box
+    final nilaiBox = Hive.box<Nilai>('nilai'); // Access Nilai box
 
     // Clear existing data
     await userBox.clear();
@@ -28,6 +31,7 @@ class DummyDataService {
     await tugasBox.clear();
     await submissionBox.clear();
     await jadwalBox.clear(); // Clear Jadwal box
+    await nilaiBox.clear(); // Clear Nilai box
 
     // 1. Generate 5 Guru data
     final List<Guru> dummyGuru = [];
@@ -270,5 +274,35 @@ class DummyDataService {
     }
     await tugasBox.addAll(dummyTugas);
     await submissionBox.addAll(dummySubmissions);
+
+    // 8. Generate Dummy Nilai (Grades)
+    final List<Nilai> dummyNilai = [];
+    final random = Random();
+
+    // Iterate through a subset of students and subjects to create grades
+    for (var siswa in dummySiswa) {
+      // Find the class the student belongs to
+      final kelas = dummyKelas.firstWhere((k) => k.id == siswa.kelasId);
+
+      // Assign grades for some of the subjects in their class
+      for (var mapel in kelas.mataPelajaranList) {
+        // Only generate grades for 60% of subjects for a bit of realism
+        if (random.nextDouble() < 0.6) {
+          final nilaiTugas = (60 + random.nextInt(40)).toDouble(); // 60-99
+          final nilaiUTS = (60 + random.nextInt(40)).toDouble();
+          final nilaiUAS = (60 + random.nextInt(40)).toDouble();
+
+          dummyNilai.add(Nilai(
+            nis: siswa.nis,
+            namaSiswa: siswa.nama,
+            mataPelajaran: mapel.nama,
+            nilaiTugas: nilaiTugas,
+            nilaiUTS: nilaiUTS,
+            nilaiUAS: nilaiUAS,
+          ));
+        }
+      }
+    }
+    await nilaiBox.addAll(dummyNilai);
   }
 }

@@ -155,7 +155,7 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                   ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Mata Pelajaran Anda',
+                    'Menu Siswa',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -163,27 +163,71 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: siswaKelas == null || siswaKelas.mataPelajaranList.isEmpty
-                        ? const EmptyState(message: 'Anda belum terdaftar di mata pelajaran manapun.', icon: Icons.school)
-                        : GridView.builder(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 3 / 2,
-                            ),
-                            itemCount: siswaKelas.mataPelajaranList.length,
-                            itemBuilder: (context, index) {
-                              final mapel = siswaKelas.mataPelajaranList[index];
-                              return _buildSubjectCard(context, siswaKelas, mapel);
-                            },
-                          ),
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      children: [
+                        _buildMenuCard(
+                          context,
+                          icon: Icons.assignment_turned_in,
+                          title: 'Rapor Saya',
+                          color: Theme.of(context).colorScheme.primary,
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.studentReportCard);
+                          },
+                        ),
+                        ...(siswaKelas == null || siswaKelas.mataPelajaranList.isEmpty
+                            ? [
+                                const EmptyState(message: 'Anda belum terdaftar di mata pelajaran manapun.', icon: Icons.school)
+                              ]
+                            : siswaKelas.mataPelajaranList.map((mapel) {
+                                return _buildSubjectCard(context, siswaKelas, mapel);
+                              }).toList()),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMenuCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 0,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.zero,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 50,
+              color: color,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

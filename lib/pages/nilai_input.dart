@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../models/nilai.dart';
+
 import '../providers/nilai_provider.dart';
 import '../providers/siswa_provider.dart';
 import '../providers/guru_provider.dart';
+import '../providers/kelas_provider.dart'; // Import KelasProvider
 import '../widgets/custom_input.dart';
 import '../widgets/empty_state.dart';
 
@@ -23,13 +25,14 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
       Provider.of<NilaiProvider>(context, listen: false).loadNilai();
       Provider.of<SiswaProvider>(context, listen: false).loadSiswa();
       Provider.of<GuruProvider>(context, listen: false).loadGuru();
+      Provider.of<KelasProvider>(context, listen: false).fetchKelas(); // Load Kelas for subjects
     });
   }
 
   void _showFormDialog({Nilai? nilai, int? index}) {
     final formKey = GlobalKey<FormState>();
     final siswaProvider = Provider.of<SiswaProvider>(context, listen: false);
-    final guruProvider = Provider.of<GuruProvider>(context, listen: false);
+    final kelasProvider = Provider.of<KelasProvider>(context, listen: false); // Use KelasProvider
 
     String? selectedNis = nilai?.nis;
     String? selectedMataPelajaran = nilai?.mataPelajaran;
@@ -39,6 +42,17 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
         text: nilai?.nilaiUTS.toString() ?? '');
     final uasController = TextEditingController(
         text: nilai?.nilaiUAS.toString() ?? '');
+    
+    // Collect all unique MataPelajaran names
+    final List<String> allMataPelajaranNames = [];
+    for (var kelas in kelasProvider.kelasList) {
+      for (var mapel in kelas.mataPelajaranList) {
+        if (!allMataPelajaranNames.contains(mapel.nama)) {
+          allMataPelajaranNames.add(mapel.nama);
+        }
+      }
+    }
+
 
     showDialog(
       context: context,
@@ -97,10 +111,10 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                           borderRadius: BorderRadius.zero,
                         ),
                       ),
-                      items: guruProvider.guruList.map((guru) {
+                      items: allMataPelajaranNames.map((mapelName) {
                         return DropdownMenuItem(
-                          value: guru.gelar,
-                          child: Text(guru.gelar),
+                          value: mapelName,
+                          child: Text(mapelName),
                         );
                       }).toList(),
                       onChanged: (value) {
