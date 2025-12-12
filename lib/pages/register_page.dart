@@ -14,14 +14,14 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController(); // Renamed to _emailController
   final _passwordController = TextEditingController();
   String _selectedRole = 'Siswa';
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose(); // Renamed to _emailController
     _passwordController.dispose();
     super.dispose();
   }
@@ -34,9 +34,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final success = await authProvider.register(
-        _usernameController.text,
+        _emailController.text, // Use email as nomorInduk
         _passwordController.text,
         _selectedRole,
+        email: _emailController.text, // Pass email explicitly
       );
 
       setState(() {
@@ -54,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Registrasi gagal. Username mungkin sudah ada.'),
+            content: const Text('Registrasi gagal. Email mungkin sudah terdaftar.'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -92,11 +93,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 48),
                       CustomInput(
-                        label: 'Username',
-                        controller: _usernameController,
+                        label: 'Email', // Changed label to Email
+                        controller: _emailController, // Changed controller
+                        keyboardType: TextInputType.emailAddress, // Added keyboard type
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Username tidak boleh kosong';
+                            return 'Email tidak boleh kosong';
+                          }
+                          if (!value.contains('@')) { // Added email validation
+                            return 'Format email tidak valid';
                           }
                           return null;
                         },

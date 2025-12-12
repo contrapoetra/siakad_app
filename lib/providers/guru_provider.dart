@@ -39,4 +39,19 @@ class GuruProvider with ChangeNotifier {
   int getGuruIndex(Guru guru) {
     return _service.getGuruIndex(guru);
   }
+
+  // New method to update a guru's NIP
+  Future<bool> updateGuruNip(String oldNip, String newNip) async {
+    final guru = _service.getGuruByNip(oldNip);
+    if (guru != null) {
+      final index = _service.getGuruIndex(guru);
+      if (index != -1) {
+        guru.nip = newNip;
+        await _service.updateGuru(index, guru);
+        loadGuru(); // Reload to reflect changes
+        return true;
+      }
+    }
+    return false;
+  }
 }

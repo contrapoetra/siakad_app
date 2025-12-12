@@ -16,13 +16,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nomorIndukController = TextEditingController(); // Changed to nomorInduk
+  final _identifierController = TextEditingController(); // Renamed to _identifierController
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _nomorIndukController.dispose(); // Changed to nomorInduk
+    _identifierController.dispose(); // Renamed to _identifierController
     _passwordController.dispose();
     super.dispose();
   }
@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final success = await authProvider.login(
-        _nomorIndukController.text, // Changed to nomorInduk
+        _identifierController.text, // Use identifier
         _passwordController.text,
       );
 
@@ -55,13 +55,25 @@ class _LoginPageState extends State<LoginPage> {
 
         Navigator.of(context).pushReplacementNamed(route);
       } else if (mounted) {
-        final userBox = Hive.box<User>('users'); // Access Hive box directly for check
-        final user = userBox.values.firstWhere(
-          (user) => user.nomorInduk == _nomorIndukController.text,
-          orElse: () => User(nomorInduk: '', password: '', role: '')
-        );
+        // Retrieve the identifier used for login
+        final String identifier = _identifierController.text;
+        final userBox = Hive.box<User>('users');
 
-        String errorMessage = 'Nomor Induk atau password salah!';
+        // Try to find user by identifier (which could be nomorInduk or email)
+        User? user;
+        user = userBox.values.firstWhere(
+          (u) => u.nomorInduk == identifier,
+          orElse: () => User(nomorInduk: '', password: '', role: '') // Fallback
+        );
+        if (user.nomorInduk.isEmpty && identifier.contains('@')) { // If not found by nomorInduk, and identifier is likely an email
+          user = userBox.values.firstWhere(
+            (u) => u.email == identifier,
+            orElse: () => User(nomorInduk: '', password: '', role: '') // Fallback
+          );
+        }
+
+
+        String errorMessage = 'Email/Nomor Induk atau password salah!';
         if (user.nomorInduk.isNotEmpty && !user.isPasswordSet) {
           errorMessage = 'Anda perlu mengatur password Anda. Silakan gunakan fitur Lupa Password.';
         }
@@ -116,11 +128,11 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 48),
                       CustomInput(
-                        label: 'Nomor Induk', // Changed label
-                        controller: _nomorIndukController, // Changed controller
+                        label: 'Email atau NIS/NIP', // Changed label
+                        controller: _identifierController, // Changed controller
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Nomor Induk tidak boleh kosong';
+                            return 'Email atau Nomor Induk tidak boleh kosong';
                           }
                           return null;
                         },

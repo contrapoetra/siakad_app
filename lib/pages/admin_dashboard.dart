@@ -17,6 +17,12 @@ class AdminDashboard extends StatelessWidget {
         title: const Text('Dashboard Admin'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.profile);
+            },
+          ),
+          IconButton(
             icon: Icon(
               Provider.of<ThemeProvider>(context).isDarkMode
                   ? Icons.light_mode

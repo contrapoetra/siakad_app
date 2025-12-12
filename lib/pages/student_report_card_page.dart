@@ -41,59 +41,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
     }
   }
 
-  Future<void> _generatePdf(List<Nilai> grades, String studentName, String studentNis) async {
-    final pdf = pw.Document();
 
-    final font = await PdfGoogleFonts.nunitoExtraLight();
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('LAPORAN NILAI SISWA', style: pw.TextStyle(font: font, fontSize: 24, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 20),
-              pw.Text('Nama Siswa: $studentName', style: pw.TextStyle(font: font, fontSize: 16)),
-              pw.Text('NIS: $studentNis', style: pw.TextStyle(font: font, fontSize: 16)),
-              pw.SizedBox(height: 30),
-              pw.TableHelper.fromTextArray(
-                headers: ['Mata Pelajaran', 'Tugas', 'UTS', 'UAS', 'Nilai Akhir', 'Predikat'],
-                data: grades.map((nilai) {
-                  return [
-                    nilai.mataPelajaran,
-                    nilai.nilaiTugas.toStringAsFixed(0),
-                    nilai.nilaiUTS.toStringAsFixed(0),
-                    nilai.nilaiUAS.toStringAsFixed(0),
-                    nilai.predikat,
-                  ];
-                }).toList(),
-                border: pw.TableBorder.all(color: PdfColors.grey),
-                headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
-                cellStyle: pw.TextStyle(font: font),
-                cellAlignments: {
-                  0: pw.Alignment.centerLeft,
-                  1: pw.Alignment.center,
-                  2: pw.Alignment.center,
-                  3: pw.Alignment.center,
-                  4: pw.Alignment.center,
-                  5: pw.Alignment.center,
-                },
-              ),
-              pw.SizedBox(height: 20),
-              pw.Align(
-                alignment: pw.Alignment.bottomRight,
-                child: pw.Text('Tanggal Cetak: ${DateFormat('dd MMMM yyyy').format(DateTime.now())}', style: pw.TextStyle(font: font, fontSize: 12)),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'rapor_$studentNis.pdf');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,12 +87,18 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
     }
 
     // Sort semesters for consistent trend display
-    final sortedSemesters = gradesBySemester.keys.toList()..sort();
+    final sortedSemesters = gradesBySemester.keys.toList()..sort((a, b) {
+      // Simple numeric sort for semesters like "Semester 1", "Semester 2"
+      final aNum = int.tryParse(a.replaceAll('Semester ', '')) ?? 0;
+      final bNum = int.tryParse(b.replaceAll('Semester ', '')) ?? 0;
+      return aNum.compareTo(bNum);
+    });
 
     List<FlSpot> spots = [];
     List<String> semesterLabels = [];
     double maxAverageGrade = 0;
 
+    // Calculate IPK (average grade) for each semester
     for (int i = 0; i < sortedSemesters.length; i++) {
       final semester = sortedSemesters[i];
       final gradesInSemester = gradesBySemester[semester]!;
@@ -158,6 +112,89 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
       }
     }
 
+    // PDF generation (more sophisticated)
+    Future<void> _generateSophisticatedPdf(List<Nilai> allGrades, String sName, String sNis, Map<String, double> ipkPerSemester) async {
+      final pdf = pw.Document();
+      final font = await PdfGoogleFonts.nunitoExtraLight();
+
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('LAPORAN AKADEMIK SISWA', style: pw.TextStyle(font: font, fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 20),
+                pw.Text('Nama Siswa: $sName', style: pw.TextStyle(font: font, fontSize: 16)),
+                pw.Text('NIS: $sNis', style: pw.TextStyle(font: font, fontSize: 16)),
+                pw.SizedBox(height: 30),
+                pw.Text('IPK Per Semester', style: pw.TextStyle(font: font, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 10),
+                pw.TableHelper.fromTextArray(
+                  headers: ['Semester', 'IPK'],
+                  data: ipkPerSemester.entries.map((entry) {
+                    return [entry.key, entry.value.toStringAsFixed(2)];
+                  }).toList(),
+                  border: pw.TableBorder.all(color: PdfColors.grey),
+                  headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
+                  cellStyle: pw.TextStyle(font: font),
+                  cellAlignments: {
+                    0: pw.Alignment.centerLeft,
+                    1: pw.Alignment.center,
+                  },
+                ),
+                pw.SizedBox(height: 30),
+                pw.Text('Detail Nilai Per Mata Pelajaran', style: pw.TextStyle(font: font, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 10),
+                pw.TableHelper.fromTextArray(
+                  headers: ['Mata Pelajaran', 'Semester', 'Tugas', 'UTS', 'UAS', 'Nilai Akhir', 'Predikat'],
+                  data: allGrades.map((nilai) {
+                    return [
+                      nilai.mataPelajaran,
+                      nilai.semester,
+                      nilai.nilaiTugas.toStringAsFixed(0),
+                      nilai.nilaiUTS.toStringAsFixed(0),
+                      nilai.nilaiUAS.toStringAsFixed(0),
+                      nilai.nilaiAkhir.toStringAsFixed(0),
+                      nilai.predikat,
+                    ];
+                  }).toList(),
+                  border: pw.TableBorder.all(color: PdfColors.grey),
+                  headerStyle: pw.TextStyle(font: font, fontWeight: pw.FontWeight.bold),
+                  cellStyle: pw.TextStyle(font: font),
+                  cellAlignments: {
+                    0: pw.Alignment.centerLeft,
+                    1: pw.Alignment.center,
+                    2: pw.Alignment.center,
+                    3: pw.Alignment.center,
+                    4: pw.Alignment.center,
+                    5: pw.Alignment.center,
+                    6: pw.Alignment.center,
+                  },
+                ),
+                pw.SizedBox(height: 20),
+                pw.Align(
+                  alignment: pw.Alignment.bottomRight,
+                  child: pw.Text('Tanggal Cetak: ${DateFormat('dd MMMM yyyy').format(DateTime.now())}', style: pw.TextStyle(font: font, fontSize: 12)),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      await Printing.sharePdf(bytes: await pdf.save(), filename: 'rapor_$sNis.pdf');
+    }
+
+    // Calculate IPK per semester for PDF
+    Map<String, double> ipkPerSemester = {};
+    for (var semester in sortedSemesters) {
+      final gradesInSemester = gradesBySemester[semester]!;
+      final averageGrade = gradesInSemester.map((n) => n.nilaiAkhir).reduce((a, b) => a + b) / gradesInSemester.length;
+      ipkPerSemester[semester] = averageGrade;
+    }
+
 
     return Scaffold(
       appBar: AppBar(
@@ -165,7 +202,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () => _generatePdf(studentGrades, studentName, currentSiswaNis),
+            onPressed: () => _generateSophisticatedPdf(studentGrades, studentName, currentSiswaNis, ipkPerSemester),
           ),
         ],
       ),
@@ -183,51 +220,39 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
+            // Displaying IPK per semester in a table
+            Text(
+              'IPK Per Semester',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 10),
             Table(
               border: TableBorder.all(color: Colors.grey.shade300),
               columnWidths: const {
-                0: FlexColumnWidth(3),
-                1: FlexColumnWidth(1.5),
-                2: FlexColumnWidth(1.5),
-                3: FlexColumnWidth(1.5),
-                4: FlexColumnWidth(2),
-                5: FlexColumnWidth(1),
+                0: FlexColumnWidth(1),
+                1: FlexColumnWidth(1),
               },
               children: [
                 TableRow(
                   decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.1).round())),
                   children: const [
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('Mata Pelajaran', style: TextStyle(fontWeight: FontWeight.bold))),
                     Padding(padding: EdgeInsets.all(8.0), child: Text('Semester', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('Nilai Akhir', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('Predikat', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
+                    Padding(padding: EdgeInsets.all(8.0), child: Text('IPK', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
                   ],
                 ),
-                ...studentGrades.map((nilai) {
+                ...ipkPerSemester.entries.map((entry) {
                   return TableRow(
                     children: [
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text('${nilai.mataPelajaran}')),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.semester, textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiAkhir.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          nilai.predikat,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _getPredikatColor(nilai.predikat),
-                          ),
-                        ),
-                      ),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(entry.key, textAlign: TextAlign.center)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(entry.value.toStringAsFixed(2), textAlign: TextAlign.center)),
                     ],
                   );
-                }).toList(),
+                }),
               ],
             ),
             const SizedBox(height: 30),
             Text(
-              'Tren Nilai Rata-Rata Per Semester',
+              'Tren IPK Per Semester',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 20),
@@ -290,7 +315,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                     lineBarsData: [
                       LineChartBarData(
                         spots: spots,
-                        isCurved: true,
+                        isCurved: false, // Make it sharp
                         gradient: LinearGradient(
                           colors: [
                             Theme.of(context).colorScheme.primary,
@@ -304,8 +329,9 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                           show: true,
                           gradient: LinearGradient(
                             colors: [
-                                                          Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()),
-                                                          Theme.of(context).colorScheme.secondary.withAlpha((255 * 0.3).round()),                            ],
+                              Theme.of(context).colorScheme.primary.withAlpha((255 * 0.3).round()),
+                              Theme.of(context).colorScheme.secondary.withAlpha((255 * 0.3).round()),
+                            ],
                           ),
                         ),
                       ),

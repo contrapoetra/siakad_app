@@ -14,6 +14,7 @@ import 'pages/forgot_password_page.dart'; // Import the new page
 import 'pages/kelas_crud.dart';
 import 'pages/classroom_page.dart'; // Import the new page
 import 'pages/student_report_card_page.dart'; // Import the new page
+import 'pages/profile_page.dart';
 
 class AppRoutes {
   static const String login = '/';
@@ -30,7 +31,8 @@ class AppRoutes {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password'; // New route
   static const String classroomPage = '/classroom';
-  static const String studentReportCard = '/student-report-card'; // New route
+  static const String studentReportCard = '/student-report-card';
+  static const String profile = '/profile'; // New route
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -46,12 +48,18 @@ class AppRoutes {
       pengumuman: (context) => const PengumumanPage(),
       roleRequest: (context) => const RoleRequestPage(),
       register: (context) => const RegisterPage(),
-      forgotPassword: (context) => const ForgotPasswordPage(), // Map the new page
+      forgotPassword: (context) =>
+          const ForgotPasswordPage(), // Map the new page
       classroomPage: (context) {
-        final args = ModalRoute.of(context)!.settings.arguments as ClassroomPageArgs;
-        return ClassroomPage(kelas: args.kelas, mataPelajaran: args.mataPelajaran);
+        final args =
+            ModalRoute.of(context)!.settings.arguments as ClassroomPageArgs;
+        return ClassroomPage(
+          kelas: args.kelas,
+          mataPelajaran: args.mataPelajaran,
+        );
       },
       studentReportCard: (context) => const StudentReportCardPage(),
+      profile: (context) => const ProfilePage(), // Map the new page
     };
   }
 }
