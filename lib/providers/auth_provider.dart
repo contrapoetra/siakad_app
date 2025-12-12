@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../models/user.dart';
-import '../models/siswa.dart'; // Import Siswa model
 import '../models/guru.dart'; // Import Guru model
 import '../services/auth_service.dart'; // Add this import
 import 'package:collection/collection.dart'; // Import for firstOrNull
@@ -39,7 +38,6 @@ class AuthProvider with ChangeNotifier {
       _currentRole = role;
 
       // Re-populate other details like username and currentUser from Hive if needed
-      // This is a simplified approach, a full user object would be better stored/retrieved
       final userBox = Hive.box<User>('users');
       final user = userBox.values.where((u) => u.nomorInduk == userId).firstOrNull;
 
@@ -47,31 +45,13 @@ class AuthProvider with ChangeNotifier {
         _currentUser = user;
         _currentUserRequestedRole = user.requestedRole;
         _currentUserRequestStatus = user.requestStatus;
-
-        final nonNullableUser = user; // Assign to non-nullable local variable
-
-        // Try to get actual name from Siswa/Guru models
-        String? actualName;
-        if (nonNullableUser.isSiswa) {
-          final siswaBox = Hive.box<Siswa>('siswa');
-          final siswa = siswaBox.values.firstWhere((s) => s.nis == nonNullableUser.nomorInduk, orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: '', namaAyah: '', namaIbu: ''));
-          if (siswa.nis.isNotEmpty) {
-            actualName = siswa.nama;
-          }
-        } else if (nonNullableUser.isGuru) {
-          final guruBox = Hive.box<Guru>('guru');
-          final guru = guruBox.values.firstWhere((g) => g.nip == nonNullableUser.nomorInduk, orElse: () => Guru(nip: '', nama: '', gelar: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: ''));
-          if (guru.nip.isNotEmpty) {
-            actualName = guru.nama;
-          }
-        }
-        _currentUsername = actualName ?? nonNullableUser.nomorInduk;
+        _currentUsername = user.name; // Use the new 'name' field from User object
       }
       notifyListeners();
     }
   }
 
-  Future<bool> register(String nomorInduk, String password, String desiredRole, {String? email}) async {
+  Future<bool> register(String nomorInduk, String password, String desiredRole, {String? email, required String name}) async {
     final userBox = Hive.box<User>('users');
     // Check if nomorInduk already exists
     if (userBox.values.any((user) => user.nomorInduk == nomorInduk)) {
@@ -91,16 +71,17 @@ class AuthProvider with ChangeNotifier {
 
     final newUser = User(
       nomorInduk: nomorInduk,
-      password: password, // This will be the initial password set by admin or during registration
+      password: password,
       role: initialRole,
       requestedRole: requestedRole,
       requestStatus: requestStatus,
       email: email,
-      isPasswordSet: true, // For manual registration, password is set immediately
+      isPasswordSet: true,
+      name: name, // Pass the new name field
     );
 
     await userBox.add(newUser);
-    notifyListeners(); // Notify listeners that a new user has been added
+    notifyListeners();
     return true;
   }
 
@@ -117,11 +98,9 @@ class AuthProvider with ChangeNotifier {
       }
 
       if (user != null && user.password == password) {
-        // FIX: Create a final non-nullable reference here
         final loggedInUser = user;
 
         if (!loggedInUser.isPasswordSet) {
-          // User needs to set a password first via forgot password flow
           return false;
         }
 
@@ -130,30 +109,7 @@ class AuthProvider with ChangeNotifier {
         _currentUserRequestedRole = loggedInUser.requestedRole;
         _currentUserRequestStatus = loggedInUser.requestStatus;
         _currentUser = loggedInUser;
-
-        // Try to get actual name from Siswa/Guru models
-        String? actualName;
-
-        // Use loggedInUser instead of user inside these blocks
-        if (loggedInUser.isSiswa) {
-          final siswaBox = Hive.box<Siswa>('siswa');
-          final siswa = siswaBox.values.firstWhere(
-              (s) => s.nis == loggedInUser.nomorInduk, // NOW SAFE
-              orElse: () => Siswa(nis: '', nama: '', kelas: '', jurusan: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: '', namaAyah: '', namaIbu: ''));
-          if (siswa.nis.isNotEmpty) {
-            actualName = siswa.nama;
-          }
-        } else if (loggedInUser.isGuru) {
-          final guruBox = Hive.box<Guru>('guru');
-          final guru = guruBox.values.firstWhere(
-              (g) => g.nip == loggedInUser.nomorInduk, // NOW SAFE
-              orElse: () => Guru(nip: '', nama: '', gelar: '', email: '', tanggalLahir: DateTime.now(), tempatLahir: ''));
-          if (guru.nip.isNotEmpty) {
-            actualName = guru.nama;
-          }
-        }
-
-        _currentUsername = actualName ?? loggedInUser.nomorInduk;
+        _currentUsername = loggedInUser.name; // Use the name from the User object
 
         await _authService.saveSession(_currentUserId!, _currentRole!);
 
@@ -191,13 +147,11 @@ class AuthProvider with ChangeNotifier {
     if (userIndex != -1) {
       // If role is accepted and it's a Guru, generate NIP and create Guru entry
       if (newRole == 'Guru' && newStatus == 'approved') {
-        // Generate a new unique NIP (e.g., based on timestamp or UUID)
         final newNip = DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
 
-        // Create a new Guru object. Use user's email as name for now, it can be updated in profile
         final newGuru = Guru(
           nip: newNip,
-          nama: user.nomorInduk, // Use initial registration identifier as name
+          nama: user.name, // Use the user's name from registration
           email: user.email.toString(),
           tanggalLahir: DateTime.now(), // Placeholder
           tempatLahir: 'Unknown', // Placeholder
@@ -210,18 +164,19 @@ class AuthProvider with ChangeNotifier {
       }
 
       user.role = newRole;
-      user.requestedRole = null; // Clear requested role after approval/rejection
+      user.requestedRole = null;
       user.requestStatus = newStatus;
       await userBox.putAt(userIndex, user);
 
       // If the current logged-in user's role was updated, reflect it
       if (_currentUser?.nomorInduk == user.nomorInduk) {
-        _currentUserId = user.nomorInduk; // Update currentUserId if it changed
+        _currentUserId = user.nomorInduk;
         _currentUser = user;
         _currentRole = user.role;
         _currentUserRequestedRole = user.requestedRole;
         _currentUserRequestStatus = user.requestStatus;
-        await _authService.saveSession(_currentUserId!, _currentRole!); // Save updated session
+        _currentUsername = user.name; // Update currentUsername as well
+        await _authService.saveSession(_currentUserId!, _currentRole!);
       }
       notifyListeners();
     }

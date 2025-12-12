@@ -151,7 +151,7 @@ class DummyDataService {
     await siswaBox.addAll(dummySiswa);
 
     // 4. Generate User data from Siswa and Guru
-    await userBox.add(User(nomorInduk: 'admin', password: 'admin123', role: 'Admin', email: 'admin@example.com', isPasswordSet: true)); // Admin user
+    await userBox.add(User(nomorInduk: 'admin', password: 'admin123', role: 'Admin', email: 'admin@example.com', isPasswordSet: true, name: 'Administrator')); // Admin user
 
     for (var siswa in dummySiswa) {
       await userBox.add(User(
@@ -160,6 +160,7 @@ class DummyDataService {
         role: 'Siswa',
         email: siswa.email,
         isPasswordSet: true, // Mark as set
+        name: siswa.nama, // Use siswa's name
       ));
     }
 
@@ -170,6 +171,7 @@ class DummyDataService {
         role: 'Guru', // Changed to Guru directly for dummy
         email: guru.email,
         isPasswordSet: true, // Mark as set
+        name: guru.nama, // Use guru's name
       ));
     }
 

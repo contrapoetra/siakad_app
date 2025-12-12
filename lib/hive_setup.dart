@@ -51,6 +51,7 @@ Future<void> initHive() async {
       role: 'Admin',
       email: 'admin@example.com',
       isPasswordSet: true,
+      name: 'Administrator', // Added name for admin user
     ));
   }
 }

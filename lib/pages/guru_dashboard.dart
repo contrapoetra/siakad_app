@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:collection/collection.dart'; // Import for firstWhereOrNull
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/guru_provider.dart';
@@ -33,7 +34,7 @@ class _GuruDashboardState extends State<GuruDashboard> {
 
     final currentGuruNip = authProvider.currentUserId;
     final currentGuru = currentGuruNip != null
-        ? guruProvider.guruList.firstWhere((g) => g.nip == currentGuruNip)
+        ? guruProvider.guruList.firstWhereOrNull((g) => g.nip == currentGuruNip)
         : null;
 
     // Get all unique subjects taught by this guru across all classes
@@ -146,18 +147,20 @@ class _GuruDashboardState extends State<GuruDashboard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Selamat Datang, ${currentGuru?.nama ?? authProvider.currentUsername}',
+                                'Selamat Datang, ${currentGuru?.nama ?? authProvider.currentUser?.name ?? 'Guru'}', // Fallback to authProvider.currentUser?.name or 'Guru'
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
+                                overflow: TextOverflow.ellipsis, // Added to prevent overflow
                               ),
                               Text(
                                 'Role: ${authProvider.currentRole}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Theme.of(context).colorScheme.onSurface.withAlpha(178),
-                                ),                              ),
+                                ),
+                              ),
                             ],
                           ),
                         ],

@@ -38,7 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
       _emailController = TextEditingController();
     }
 
-    _nameController = TextEditingController(text: _getNameBasedOnRole());
+    _nameController = TextEditingController(text: authProvider.currentUser?.name ?? _getNameBasedOnRole());
   }
 
   String _getNameBasedOnRole() {
@@ -46,14 +46,19 @@ class _ProfilePageState extends State<ProfilePage> {
     final siswaProvider = Provider.of<SiswaProvider>(context, listen: false);
     final guruProvider = Provider.of<GuruProvider>(context, listen: false);
 
+    // Prioritize the name stored directly in the User object
+    if (authProvider.currentUser?.name != null && authProvider.currentUser!.name.isNotEmpty) {
+      return authProvider.currentUser!.name;
+    }
+
     if (_currentRole == 'Siswa') {
       final siswa = siswaProvider.getSiswaByNis(_currentNisNip);
-      return siswa?.nama ?? authProvider.currentUsername ?? '';
+      return siswa?.nama ?? '';
     } else if (_currentRole == 'Guru') {
       final guru = guruProvider.getGuruByNip(_currentNisNip);
-      return guru?.nama ?? authProvider.currentUsername ?? '';
+      return guru?.nama ?? '';
     }
-    return authProvider.currentUsername ?? ''; // Fallback for Admin or if data not found
+    return ''; // Fallback for Admin or if data not found, or empty if no name is available
   }
 
   @override
@@ -180,9 +185,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
-                'Nomor Induk: $_currentNisNip',
+                'Nomor Induk Anda: $_currentNisNip',
                 style: const TextStyle(fontSize: 16),
               ),
+
               if (_requestedRole != null && _requestStatus == 'pending')
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 16.0),

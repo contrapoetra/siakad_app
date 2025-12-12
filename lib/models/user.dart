@@ -20,6 +20,8 @@ class User extends HiveObject {
   String? email; // New field for email
   @HiveField(6)
   bool isPasswordSet; // New field to track if password has been set by user
+  @HiveField(7)
+  String name; // New field for user's full name
 
   User({
     required this.nomorInduk,
@@ -29,6 +31,7 @@ class User extends HiveObject {
     this.requestStatus,
     this.email,
     this.isPasswordSet = false, // Default to false
+    required this.name, // Make name required
   });
 
   // Method to check if the user is a Siswa

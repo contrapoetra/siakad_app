@@ -14,19 +14,46 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(); // Renamed to _emailController
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nomorIndukController = TextEditingController();
+  final _nameController = TextEditingController(); // New controller for name
   String _selectedRole = 'Siswa';
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    _generateNisForSiswa();
+  }
+
+  void _generateNisForSiswa() {
+    if (_selectedRole == 'Siswa') {
+      final uniqueNis = DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
+      _nomorIndukController.text = uniqueNis;
+    } else {
+      // Only clear if the previous role was Siswa and we are switching away
+      if (_nomorIndukController.text.isNotEmpty && _selectedRole == 'Siswa') {
+        _nomorIndukController.clear();
+      }
+    }
+  }
+
+  @override
   void dispose() {
-    _emailController.dispose(); // Renamed to _emailController
+    _emailController.dispose();
     _passwordController.dispose();
+    _nomorIndukController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
+    // Ensure _nomorIndukController.text is set for Siswa before validation
+    if (_selectedRole == 'Siswa' && _nomorIndukController.text.isEmpty) {
+      _generateNisForSiswa(); // Regenerate if somehow empty
+    }
+
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -34,10 +61,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final success = await authProvider.register(
-        _emailController.text, // Use email as nomorInduk
+        _nomorIndukController.text,
         _passwordController.text,
         _selectedRole,
-        email: _emailController.text, // Pass email explicitly
+        email: _emailController.text,
+        name: _nameController.text, // Pass the new name field
       );
 
       setState(() {
@@ -55,7 +83,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Registrasi gagal. Email mungkin sudah terdaftar.'),
+            content: const Text('Registrasi gagal. NIS/NIP mungkin sudah terdaftar.'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -66,7 +94,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface, // Use surface color
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Stack(
         children: [
           SafeArea(
@@ -93,20 +121,44 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 48),
                       CustomInput(
-                        label: 'Email', // Changed label to Email
-                        controller: _emailController, // Changed controller
-                        keyboardType: TextInputType.emailAddress, // Added keyboard type
+                        label: 'Nama Lengkap', // New name input field
+                        controller: _nameController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nama tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      CustomInput(
+                        label: 'Email',
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Email tidak boleh kosong';
                           }
-                          if (!value.contains('@')) { // Added email validation
+                          if (!value.contains('@')) {
                             return 'Format email tidak valid';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
+                      CustomInput(
+                        label: 'NIS/NIP',
+                        controller: _nomorIndukController,
+                        enabled: _selectedRole != 'Siswa',
+                        validator: (value) {
+                          if (_selectedRole != 'Siswa') { // Only validate if not Siswa (i.e., field is enabled)
+                            if (value == null || value.isEmpty) {
+                              return 'NIS/NIP tidak boleh kosong';
+                            }
+                          }
+                          return null;
+                        },
+                      ),
                       CustomInput(
                         label: 'Password',
                         controller: _passwordController,
@@ -123,7 +175,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value: _selectedRole,
+                        initialValue: _selectedRole,
                         decoration: InputDecoration(
                           labelText: 'Daftar Sebagai',
                           border: OutlineInputBorder(
@@ -141,6 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         onChanged: (String? newValue) {
                           setState(() {
                             _selectedRole = newValue!;
+                            _generateNisForSiswa(); // Call when role changes
                           });
                         },
                       ),

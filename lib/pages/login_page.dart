@@ -63,12 +63,12 @@ class _LoginPageState extends State<LoginPage> {
         User? user;
         user = userBox.values.firstWhere(
           (u) => u.nomorInduk == identifier,
-          orElse: () => User(nomorInduk: '', password: '', role: '') // Fallback
+          orElse: () => User(nomorInduk: '', password: '', role: '', name: '') // Fallback
         );
         if (user.nomorInduk.isEmpty && identifier.contains('@')) { // If not found by nomorInduk, and identifier is likely an email
           user = userBox.values.firstWhere(
             (u) => u.email == identifier,
-            orElse: () => User(nomorInduk: '', password: '', role: '') // Fallback
+            orElse: () => User(nomorInduk: '', password: '', role: '', name: '') // Fallback
           );
         }
 
