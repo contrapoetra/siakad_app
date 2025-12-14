@@ -29,6 +29,9 @@ class Nilai extends HiveObject {
   @HiveField(7) // Update HiveField index
   late String id; // Unique ID
 
+  @HiveField(8)
+  late double nilaiKehadiran;
+
   Nilai({
     String? id, // Make id optional in constructor
     required this.nis,
@@ -38,11 +41,12 @@ class Nilai extends HiveObject {
     required this.nilaiTugas,
     required this.nilaiUTS,
     required this.nilaiUAS,
+    required this.nilaiKehadiran,
   }) : id = id ?? const Uuid().v4(); // Initialize id in constructor
 
   // Hitung nilai akhir
   double get nilaiAkhir {
-    return (nilaiTugas * 0.3) + (nilaiUTS * 0.3) + (nilaiUAS * 0.4);
+    return (nilaiKehadiran * 0.1) + (nilaiTugas * 0.2) + (nilaiUTS * 0.3) + (nilaiUAS * 0.4);
   }
 
   // Konversi ke predikat

@@ -25,13 +25,14 @@ class NilaiAdapter extends TypeAdapter<Nilai> {
       nilaiTugas: fields[4] as double,
       nilaiUTS: fields[5] as double,
       nilaiUAS: fields[6] as double,
+      nilaiKehadiran: fields[8] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, Nilai obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.nis)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class NilaiAdapter extends TypeAdapter<Nilai> {
       ..writeByte(6)
       ..write(obj.nilaiUAS)
       ..writeByte(7)
-      ..write(obj.id);
+      ..write(obj.id)
+      ..writeByte(8)
+      ..write(obj.nilaiKehadiran);
   }
 
   @override

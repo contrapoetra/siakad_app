@@ -8,6 +8,7 @@ import '../models/tugas.dart';
 import '../models/pengumpulan_tugas.dart';
 import '../models/jadwal.dart'; // Import Jadwal model
 import '../models/nilai.dart'; // Import Nilai model
+import '../models/pengumuman.dart'; // Import Pengumuman model
 import 'dart:math'; // Import for Random
 
 class DummyDataService {
@@ -21,6 +22,7 @@ class DummyDataService {
     final submissionBox = Hive.box<PengumpulanTugas>('submissions');
     final jadwalBox = Hive.box<Jadwal>('jadwal'); // Access Jadwal box
     final nilaiBox = Hive.box<Nilai>('nilai'); // Access Nilai box
+    final pengumumanBox = Hive.box<Pengumuman>('pengumuman'); // Access Pengumuman box
 
     // Clear existing data
     await userBox.clear();
@@ -32,6 +34,32 @@ class DummyDataService {
     await submissionBox.clear();
     await jadwalBox.clear(); // Clear Jadwal box
     await nilaiBox.clear(); // Clear Nilai box
+    await pengumumanBox.clear(); // Clear Pengumuman box
+
+    // 0. Generate Dummy Pengumuman
+    final List<Pengumuman> dummyPengumuman = [
+      Pengumuman(
+        judul: 'Libur Semester Ganjil',
+        isi: 'Diberitahukan kepada seluruh siswa bahwa libur semester ganjil akan dimulai pada tanggal 20 Desember 2024 sampai dengan 5 Januari 2025. Selamat berlibur!',
+        tanggal: DateTime.now().subtract(const Duration(days: 2)),
+      ),
+      Pengumuman(
+        judul: 'Jadwal UAS Semester Genap',
+        isi: 'Ujian Akhir Semester Genap akan dilaksanakan mulai tanggal 10 Juni 2025. Harap mempersiapkan diri dengan baik.',
+        tanggal: DateTime.now().subtract(const Duration(days: 5)),
+      ),
+      Pengumuman(
+        judul: 'Kegiatan Porseni Sekolah',
+        isi: 'Pekan Olahraga dan Seni (Porseni) akan diadakan setelah UAS selesai. Segera daftarkan tim kelas kalian!',
+        tanggal: DateTime.now().subtract(const Duration(days: 10)),
+      ),
+      Pengumuman(
+        judul: 'Pengambilan Kartu Rencana Studi',
+        isi: 'Pengambilan KRS untuk semester depan dapat dilakukan mulai hari Senin di ruang Tata Usaha.',
+        tanggal: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+    ];
+    await pengumumanBox.addAll(dummyPengumuman);
 
     // 1. Generate 5 Guru data
     final List<Guru> dummyGuru = [];
@@ -200,82 +228,14 @@ class DummyDataService {
 
 
     // 6. Generate Dummy Materi
-    final List<Materi> dummyMateri = [];
-    for (var kelas in dummyKelas) {
-      for (var mapel in kelas.mataPelajaranList) {
-        final guru = dummyGuru.firstWhere((g) => g.nip == mapel.guruNip); // Get the teacher for the subject
-
-        dummyMateri.add(Materi(
-          id: 'materi_${kelas.id}_${mapel.id}_1',
-          judul: 'Pendahuluan ${mapel.nama}',
-          deskripsi: 'Materi pengantar untuk mata pelajaran ${mapel.nama}. Mencakup konsep dasar dan ruang lingkup.',
-          fileUrl: 'https://example.com/materi_${mapel.id}_1.pdf',
-          kelasId: kelas.id,
-          mataPelajaranId: mapel.id,
-          guruId: guru.nip,
-          createdAt: DateTime.now().subtract(const Duration(days: 10)),
-        ));
-
-        dummyMateri.add(Materi(
-          id: 'materi_${kelas.id}_${mapel.id}_2',
-          judul: 'Modul ${mapel.nama} - Bab 1',
-          deskripsi: 'Modul pembelajaran untuk Bab 1 mata pelajaran ${mapel.nama}.',
-          fileUrl: 'https://example.com/modul_${mapel.id}_bab1.docx',
-          kelasId: kelas.id,
-          mataPelajaranId: mapel.id,
-          guruId: guru.nip,
-          createdAt: DateTime.now().subtract(const Duration(days: 7)),
-        ));
-      }
-    }
-    await materiBox.addAll(dummyMateri);
+    // LMS features scrapped. We clear the box but do not generate data.
+    // await materiBox.addAll(dummyMateri);
 
 
     // 7. Generate Dummy Tugas and Submissions
-    final List<Tugas> dummyTugas = [];
-    final List<PengumpulanTugas> dummySubmissions = [];
-
-    for (var kelas in dummyKelas) {
-      final studentsInClass = dummySiswa.where((s) => s.kelasId == kelas.id).toList();
-      for (var mapel in kelas.mataPelajaranList) {
-        final guru = dummyGuru.firstWhere((g) => g.nip == mapel.guruNip);
-
-        // Create 2 assignments per subject
-        for (int i = 0; i < 2; i++) {
-          final tugasId = 'tugas_${kelas.id}_${mapel.id}_$i';
-          final tugas = Tugas(
-            id: tugasId,
-            judul: 'Tugas ${mapel.nama} ${i + 1}',
-            deskripsi: 'Kerjakan soal-soal di halaman ${10 * (i + 1)} buku cetak.',
-            kelasId: kelas.id,
-            mataPelajaranId: mapel.id,
-            guruId: guru.nip,
-            deadline: DateTime.now().add(Duration(days: 5 + (i * 7))),
-            createdAt: DateTime.now().subtract(Duration(days: 15 - (i * 7))),
-          );
-          dummyTugas.add(tugas);
-
-          // Simulate some submissions for the first assignment
-          if (i == 0) {
-            for (int j = 0; j < studentsInClass.length ~/ 2; j++) { // Half of students submit
-              final siswa = studentsInClass[j];
-              final submission = PengumpulanTugas(
-                id: 'sub_${tugasId}_${siswa.nis}',
-                tugasId: tugasId,
-                siswaNis: siswa.nis,
-                content: 'Jawaban saya untuk ${tugas.judul}.',
-                submittedAt: DateTime.now().subtract(const Duration(days: 2)),
-                nilai: (j % 2 == 0) ? 85.0 : 70.0, // Some graded, some not
-                feedback: (j % 2 == 0) ? 'Bagus sekali!' : 'Perlu ditingkatkan.',
-              );
-              dummySubmissions.add(submission);
-            }
-          }
-        }
-      }
-    }
-    await tugasBox.addAll(dummyTugas);
-    await submissionBox.addAll(dummySubmissions);
+    // LMS features scrapped. We clear the box but do not generate data.
+    // await tugasBox.addAll(dummyTugas);
+    // await submissionBox.addAll(dummySubmissions);
 
     // 8. Generate Dummy Nilai (Grades)
     final List<Nilai> dummyNilai = [];
@@ -294,6 +254,7 @@ class DummyDataService {
           final nilaiTugas = (60 + random.nextInt(40)).toDouble(); // 60-99
           final nilaiUTS = (60 + random.nextInt(40)).toDouble();
           final nilaiUAS = (60 + random.nextInt(40)).toDouble();
+          final nilaiKehadiran = (60 + random.nextInt(40)).toDouble();
           final semester = semesterOptions[random.nextInt(semesterOptions.length)]; // Random semester
 
           dummyNilai.add(Nilai(
@@ -304,10 +265,10 @@ class DummyDataService {
             nilaiTugas: nilaiTugas,
             nilaiUTS: nilaiUTS,
             nilaiUAS: nilaiUAS,
+            nilaiKehadiran: nilaiKehadiran,
           ));
         // }
       }
     }
-    await nilaiBox.addAll(dummyNilai);
-  }
+    await nilaiBox.addAll(dummyNilai);  }
 }

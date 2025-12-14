@@ -43,6 +43,8 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
         text: nilai?.nilaiUTS.toString() ?? '');
     final uasController = TextEditingController(
         text: nilai?.nilaiUAS.toString() ?? '');
+    final kehadiranController = TextEditingController(
+        text: nilai?.nilaiKehadiran.toString() ?? '');
     
     // Collect all unique MataPelajaran names
     final List<String> allMataPelajaranNames = [];
@@ -160,6 +162,21 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                       },
                     ),
                     CustomInput(
+                      label: 'Nilai Kehadiran (0-100)',
+                      controller: kehadiranController,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Nilai Kehadiran tidak boleh kosong';
+                        }
+                        final nilai = double.tryParse(value);
+                        if (nilai == null || nilai < 0 || nilai > 100) {
+                          return 'Nilai harus antara 0-100';
+                        }
+                        return null;
+                      },
+                    ),
+                    CustomInput(
                       label: 'Nilai Tugas (0-100)',
                       controller: tugasController,
                       keyboardType: TextInputType.number,
@@ -229,6 +246,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                         nilaiTugas: double.parse(tugasController.text),
                         nilaiUTS: double.parse(utsController.text),
                         nilaiUAS: double.parse(uasController.text),
+                        nilaiKehadiran: double.parse(kehadiranController.text),
                       );
 
                       if (index == null) {

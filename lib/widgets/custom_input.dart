@@ -10,6 +10,7 @@ class CustomInput extends StatelessWidget {
   final bool enabled;
   final bool readOnly; // New parameter
   final VoidCallback? onTap; // New parameter
+  final ValueChanged<String>? onChanged; // New parameter
 
   const CustomInput({
     super.key,
@@ -22,6 +23,7 @@ class CustomInput extends StatelessWidget {
     this.enabled = true,
     this.readOnly = false, // Default to false
     this.onTap, // Optional onTap callback
+    this.onChanged,
   });
 
   @override
@@ -37,6 +39,7 @@ class CustomInput extends StatelessWidget {
         enabled: enabled,
         readOnly: readOnly, // Pass to TextFormField
         onTap: onTap, // Pass to TextFormField
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
         ),

@@ -4,10 +4,14 @@ import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/siswa_provider.dart';
 import '../providers/kelas_provider.dart';
+import '../providers/jadwal_provider.dart'; // Import JadwalProvider
+import '../providers/pengumuman_provider.dart'; // Import PengumumanProvider
 import '../models/kelas.dart';
+import '../models/jadwal.dart';
 import '../routes.dart';
 import '../widgets/empty_state.dart';
-import 'classroom_page.dart'; // Import ClassroomPage
+import 'classroom_page.dart';
+import 'package:intl/intl.dart';
 
 class SiswaDashboard extends StatefulWidget {
   const SiswaDashboard({super.key});
@@ -23,14 +27,71 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<SiswaProvider>(context, listen: false).loadSiswa();
       Provider.of<KelasProvider>(context, listen: false).fetchKelas();
+      Provider.of<JadwalProvider>(context, listen: false).loadJadwal(); // Load Jadwal
+      Provider.of<PengumumanProvider>(context, listen: false).loadPengumuman(); // Load Pengumuman
     });
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Dashboard Siswa'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Dashboard', icon: Icon(Icons.dashboard)),
+              Tab(text: 'Pengumuman', icon: Icon(Icons.campaign)),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.person),
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.profile);
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Provider.of<ThemeProvider>(context).isDarkMode
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
+              onPressed: () {
+                Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                Provider.of<AuthProvider>(context, listen: false).logout();
+                Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+              },
+            ),
+          ],
+        ),
+        body: const TabBarView(
+          children: [
+            SiswaHomeTab(),
+            SiswaPengumumanTab(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SiswaHomeTab extends StatelessWidget {
+  const SiswaHomeTab({super.key});
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final siswaProvider = Provider.of<SiswaProvider>(context);
     final kelasProvider = Provider.of<KelasProvider>(context);
+    final jadwalProvider = Provider.of<JadwalProvider>(context);
+    final pengumumanProvider = Provider.of<PengumumanProvider>(context);
 
     final currentSiswaNis = authProvider.currentUserId;
     final currentSiswa = currentSiswaNis != null
@@ -41,204 +102,83 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
         ? kelasProvider.getKelasById(currentSiswa.kelasId!)
         : null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard Siswa'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.profile);
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Provider.of<ThemeProvider>(context).isDarkMode
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
-            onPressed: () {
-              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              authProvider.logout();
-              Navigator.of(context).pushReplacementNamed(AppRoutes.login);
-            },
-          ),
-        ],
-      ),
-      body: Column(
+    final latestPengumuman = pengumumanProvider.pengumumanList.isNotEmpty
+        ? pengumumanProvider.pengumumanList.first
+        : null;
+
+    // Filter jadwal for student's class
+    final List<Jadwal> studentJadwal = siswaKelas != null
+        ? jadwalProvider.getJadwalByKelas(siswaKelas.id)
+        : [];
+    
+    // Sort jadwal (simple sort by day then time, ideally needs better sorting)
+    studentJadwal.sort((a, b) {
+      const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+      int dayA = days.indexOf(a.hari);
+      int dayB = days.indexOf(b.hari);
+      if (dayA != dayB) return dayA.compareTo(dayB);
+      return a.jam.compareTo(b.jam);
+    });
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (authProvider.currentUserRequestedRole != null &&
-              authProvider.currentUserRequestStatus != 'approved')
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                String message = '';
-                Color backgroundColor = Colors.amber;
-                IconData icon = Icons.info_outline;
-
-                if (authProvider.currentUserRequestStatus == 'pending') {
-                  message =
-                      'Permintaan role ${authProvider.currentUserRequestedRole} Anda sedang menunggu persetujuan admin.';
-                  backgroundColor = Colors.blue.shade100;
-                  icon = Icons.info_outline;
-                } else if (authProvider.currentUserRequestStatus == 'rejected') {
-                  message =
-                      'Permintaan role ${authProvider.currentUserRequestedRole} Anda telah ditolak oleh admin.';
-                  backgroundColor = Colors.red.shade100;
-                  icon = Icons.error_outline;
-                }
-
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  color: backgroundColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Icon(icon, color: Theme.of(context).colorScheme.onSurface),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            message,
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            color: Theme.of(context).colorScheme.primary, // Primary color
-                            child: Icon(
-                              Icons.person,
-                              size: 35,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Selamat Datang, ${currentSiswa?.nama ?? authProvider.currentUsername}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Kelas: ${siswaKelas?.nama ?? 'N/A'}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context).colorScheme.onSurface.withAlpha(178), // Changed from withOpacity
-                                ),                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Menu Siswa',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      children: [
-                        _buildMenuCard(
-                          context,
-                          icon: Icons.announcement,
-                          title: 'Pengumuman',
-                          color: Theme.of(context).colorScheme.primary,
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.pengumuman);
-                          },
-                        ),
-                        _buildMenuCard(
-                          context,
-                          icon: Icons.assignment_turned_in,
-                          title: 'Rapor Saya',
-                          color: Theme.of(context).colorScheme.primary,
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.studentReportCard);
-                          },
-                        ),
-                        if (siswaKelas != null && siswaKelas.mataPelajaranList.isNotEmpty) // Only show if student is in a class with subjects
-                          ...siswaKelas.mataPelajaranList.map((mapel) {
-                                return _buildSubjectCard(context, siswaKelas, mapel);
-                              }),
-                        if (siswaKelas == null || siswaKelas.mataPelajaranList.isEmpty) // Show EmptyState if no class or no subjects
-                          const EmptyState(message: 'Anda belum terdaftar di mata pelajaran manapun.', icon: Icons.school),
-                      ],
-                    ),
-                  ),
-                ],
+          _buildWelcomeCard(context, currentSiswa?.nama ?? authProvider.currentUsername ?? 'Siswa', siswaKelas?.nama),
+          const SizedBox(height: 16),
+          if (latestPengumuman != null)
+            _buildLatestPengumuman(context, latestPengumuman),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Jadwal Pelajaran',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
               ),
-            ),
+              TextButton(
+                onPressed: () {
+                   Navigator.pushNamed(context, AppRoutes.studentReportCard);
+                },
+                child: const Text('Lihat Rapor'),
+              )
+            ],
           ),
+          const SizedBox(height: 8),
+          if (studentJadwal.isEmpty)
+             const EmptyState(message: 'Tidak ada jadwal pelajaran.', icon: Icons.calendar_today),
+          ...studentJadwal.map((jadwal) => _buildJadwalItem(context, jadwal, siswaKelas!)),
         ],
       ),
     );
   }
 
-  Widget _buildMenuCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildWelcomeCard(BuildContext context, String name, String? className) {
     return Card(
-      elevation: 0,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.zero,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
           children: [
-            Icon(
-              icon,
-              size: 50,
-              color: color,
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: const Icon(Icons.person, size: 30, color: Colors.white),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Halo, $name!',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  className != null ? 'Kelas $className' : 'Belum ada kelas',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                ),
+              ],
             ),
           ],
         ),
@@ -246,52 +186,103 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
     );
   }
 
-  Widget _buildSubjectCard(BuildContext context, Kelas kelas, MataPelajaran mapel) {
+  Widget _buildLatestPengumuman(BuildContext context, dynamic pengumuman) {
     return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            AppRoutes.classroomPage,
-            arguments: ClassroomPageArgs(kelas: kelas, mataPelajaran: mapel),
-          );
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 80,
-              width: double.infinity,
-              color: Theme.of(context).colorScheme.secondary,
-              alignment: Alignment.center,
-              child: Text(
-                mapel.nama,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Kelas: ${kelas.nama}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                'Guru: ${mapel.guruNama}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          ],
+      color: Theme.of(context).colorScheme.primaryContainer,
+      child: ListTile(
+        leading: const Icon(Icons.campaign),
+        title: Text(pengumuman.judul, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(
+          pengumuman.isi, 
+          maxLines: 2, 
+          overflow: TextOverflow.ellipsis,
         ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          DefaultTabController.of(context).animateTo(1); // Switch to Pengumuman tab
+        },
       ),
+    );
+  }
+
+  Widget _buildJadwalItem(BuildContext context, Jadwal jadwal, Kelas kelas) {
+    // Find mata pelajaran object to navigate to classroom
+    // Ideally we should have it, but here we construct or find it from kelas
+    final mapel = kelas.mataPelajaranList.firstWhere(
+      (m) => m.id == jadwal.mapelId, 
+      orElse: () => MataPelajaran(id: '', nama: jadwal.mataPelajaran, guruNip: '', guruNama: jadwal.guruPengampu),
+    );
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Theme.of(context).colorScheme.secondary,
+          child: Text(jadwal.mataPelajaran.substring(0, 1), style: const TextStyle(color: Colors.white)),
+        ),
+        title: Text(jadwal.mataPelajaran, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text('${jadwal.hari}, ${jadwal.jam}\n${jadwal.guruPengampu}'),
+        isThreeLine: true,
+        onTap: () {
+           if (mapel.id.isNotEmpty) {
+             Navigator.pushNamed(
+              context,
+              AppRoutes.classroomPage,
+              arguments: ClassroomPageArgs(kelas: kelas, mataPelajaran: mapel),
+            );
+           }
+        },
+      ),
+    );
+  }
+}
+
+class SiswaPengumumanTab extends StatelessWidget {
+  const SiswaPengumumanTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final pengumumanProvider = Provider.of<PengumumanProvider>(context);
+    final list = pengumumanProvider.pengumumanList;
+
+    if (list.isEmpty) {
+      return const EmptyState(message: 'Belum ada pengumuman.', icon: Icons.notifications_off);
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final item = list[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.judul,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Text(
+                      DateFormat('dd MMM yyyy').format(item.tanggal),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Text(item.isi),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

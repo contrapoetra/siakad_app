@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:collection/collection.dart'; // Import for firstWhereOrNull
+import 'package:collection/collection.dart';
+import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/guru_provider.dart';
 import '../providers/kelas_provider.dart';
+import '../providers/siswa_provider.dart';
+import '../providers/nilai_provider.dart';
+import '../providers/pengumuman_provider.dart';
 import '../models/kelas.dart';
 import '../routes.dart';
-import 'classroom_page.dart'; // Import ClassroomPage
+import '../widgets/empty_state.dart';
+import 'classroom_page.dart';
 
 class GuruDashboard extends StatefulWidget {
   const GuruDashboard({super.key});
@@ -23,18 +28,81 @@ class _GuruDashboardState extends State<GuruDashboard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<GuruProvider>(context, listen: false).loadGuru();
       Provider.of<KelasProvider>(context, listen: false).fetchKelas();
+      Provider.of<SiswaProvider>(context, listen: false).loadSiswa();
+      Provider.of<NilaiProvider>(context, listen: false).loadNilai();
+      Provider.of<PengumumanProvider>(context, listen: false).loadPengumuman();
     });
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Dashboard Guru'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Dashboard', icon: Icon(Icons.dashboard)),
+              Tab(text: 'Pengumuman', icon: Icon(Icons.campaign)),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.person),
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.profile);
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Provider.of<ThemeProvider>(context).isDarkMode
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
+              onPressed: () {
+                Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                Provider.of<AuthProvider>(context, listen: false).logout();
+                Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+              },
+            ),
+          ],
+        ),
+        body: const TabBarView(
+          children: [
+            GuruHomeTab(),
+            GuruPengumumanTab(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GuruHomeTab extends StatelessWidget {
+  const GuruHomeTab({super.key});
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final guruProvider = Provider.of<GuruProvider>(context);
     final kelasProvider = Provider.of<KelasProvider>(context);
+    final siswaProvider = Provider.of<SiswaProvider>(context);
+    final nilaiProvider = Provider.of<NilaiProvider>(context);
+    final pengumumanProvider = Provider.of<PengumumanProvider>(context);
 
     final currentGuruNip = authProvider.currentUserId;
     final currentGuru = currentGuruNip != null
         ? guruProvider.guruList.firstWhereOrNull((g) => g.nip == currentGuruNip)
+        : null;
+
+    final latestPengumuman = pengumumanProvider.pengumumanList.isNotEmpty
+        ? pengumumanProvider.pengumumanList.first
         : null;
 
     // Get all unique subjects taught by this guru across all classes
@@ -47,203 +115,75 @@ class _GuruDashboardState extends State<GuruDashboard> {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard Guru'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.profile);
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Provider.of<ThemeProvider>(context).isDarkMode
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
-            onPressed: () {
-              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              authProvider.logout();
-              Navigator.of(context).pushReplacementNamed(AppRoutes.login);
-            },
-          ),
-        ],
-      ),
-      body: Column(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (authProvider.currentUserRequestedRole != null &&
-              authProvider.currentUserRequestStatus != 'approved')
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                String message = '';
-                Color backgroundColor = Colors.amber;
-                IconData icon = Icons.info_outline;
-
-                if (authProvider.currentUserRequestStatus == 'pending') {
-                  message =
-                      'Permintaan role ${authProvider.currentUserRequestedRole} Anda sedang menunggu persetujuan admin.';
-                  backgroundColor = Colors.blue.shade100;
-                  icon = Icons.info_outline;
-                } else if (authProvider.currentUserRequestStatus == 'rejected') {
-                  message =
-                      'Permintaan role ${authProvider.currentUserRequestedRole} Anda telah ditolak oleh admin.';
-                  backgroundColor = Colors.red.shade100;
-                  icon = Icons.error_outline;
-                }
-
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  color: backgroundColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Icon(icon, color: Theme.of(context).colorScheme.onSurface),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            message,
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            color: Theme.of(context).colorScheme.primary, // Primary color
-                            child: Icon(
-                              Icons.person,
-                              size: 35,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Selamat Datang, ${currentGuru?.nama ?? authProvider.currentUser?.name ?? 'Guru'}', // Fallback to authProvider.currentUser?.name or 'Guru'
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                overflow: TextOverflow.ellipsis, // Added to prevent overflow
-                              ),
-                              Text(
-                                'Role: ${authProvider.currentRole}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context).colorScheme.onSurface.withAlpha(178),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Add Pengumuman button for Guru
-                  _buildMenuCard(
-                    context,
-                    icon: Icons.announcement,
-                    title: 'Pengumuman',
-                    color: Theme.of(context).colorScheme.primary,
-                    onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.pengumuman);
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Kelas yang Anda Ajar',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: guruSubjects.isEmpty
-                        ? const Center(child: Text('Anda belum mengajar kelas apapun.'))
-                        : GridView.builder(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 3 / 2, // Adjust as needed
-                            ),
-                            itemCount: guruSubjects.length,
-                            itemBuilder: (context, index) {
-                              final subject = guruSubjects[index];
-                              final kelas = subject['kelas'] as Kelas;
-                              final mapel = subject['mataPelajaran'] as MataPelajaran;
-                              return _buildSubjectCard(context, kelas, mapel);
-                            },
-                          ),
-                  ),
-                ],
-              ),
-            ),
+          _buildWelcomeCard(context, currentGuru?.nama ?? authProvider.currentUser?.name ?? 'Guru'),
+          const SizedBox(height: 16),
+          if (latestPengumuman != null)
+            _buildLatestPengumuman(context, latestPengumuman),
+          const SizedBox(height: 24),
+          Text(
+            'Kelas yang Anda Ajar',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
+          const SizedBox(height: 16),
+          if (guruSubjects.isEmpty)
+             const EmptyState(message: 'Anda belum mengajar kelas apapun.', icon: Icons.class_outlined),
+          ...guruSubjects.map((item) {
+            final kelas = item['kelas'] as Kelas;
+            final mapel = item['mataPelajaran'] as MataPelajaran;
+            
+            // Stats
+            final studentsInClass = siswaProvider.siswaList.where((s) => s.kelasId == kelas.id).toList();
+            final totalStudents = studentsInClass.length;
+            
+            // Count graded students (those who have a Nilai entry for this mapel)
+            // Note: Simplification - checking if ANY grade exists for this mapel/student combo
+            int gradedCount = 0;
+            for (var student in studentsInClass) {
+              final hasGrade = nilaiProvider.nilaiList.any((n) => 
+                n.nis == student.nis && 
+                n.mataPelajaran == mapel.nama
+              );
+              if (hasGrade) gradedCount++;
+            }
+            final unGradedCount = totalStudents - gradedCount;
+
+            return _buildClassListItem(context, kelas, mapel, totalStudents, gradedCount, unGradedCount);
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildMenuCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildWelcomeCard(BuildContext context, String name) {
     return Card(
-      elevation: 0,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.zero,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
           children: [
-            Icon(
-              icon,
-              size: 50,
-              color: color,
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: const Icon(Icons.person, size: 30, color: Colors.white),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Halo, $name!',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Selamat mengajar!',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                ),
+              ],
             ),
           ],
         ),
@@ -251,10 +191,28 @@ class _GuruDashboardState extends State<GuruDashboard> {
     );
   }
 
-  Widget _buildSubjectCard(BuildContext context, Kelas kelas, MataPelajaran mapel) {
+  Widget _buildLatestPengumuman(BuildContext context, dynamic pengumuman) {
     return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
+      color: Theme.of(context).colorScheme.primaryContainer,
+      child: ListTile(
+        leading: const Icon(Icons.campaign),
+        title: Text(pengumuman.judul, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(
+          pengumuman.isi, 
+          maxLines: 2, 
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          DefaultTabController.of(context).animateTo(1); // Switch to Pengumuman tab
+        },
+      ),
+    );
+  }
+
+  Widget _buildClassListItem(BuildContext context, Kelas kelas, MataPelajaran mapel, int totalStudents, int graded, int ungraded) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: () {
           Navigator.pushNamed(
@@ -263,46 +221,131 @@ class _GuruDashboardState extends State<GuruDashboard> {
             arguments: ClassroomPageArgs(kelas: kelas, mataPelajaran: mapel),
           );
         },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 80,
-              width: double.infinity,
-              color: Theme.of(context).colorScheme.primary,
-              alignment: Alignment.center,
-              child: Text(
-                mapel.nama,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    kelas.nama.replaceAll(' ', '\n'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Expanded( // Wrap in Expanded
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Kelas: ${kelas.nama}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  overflow: TextOverflow.ellipsis, // Add overflow handling
+                  ),
                 ),
               ),
-            ),
-            Expanded( // Wrap in Expanded
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  'Guru: ${mapel.guruNama}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  overflow: TextOverflow.ellipsis, // Add overflow handling
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      kelas.nama,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      mapel.nama,
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildStatChip(context, Icons.people, '$totalStudents Siswa', Colors.blue),
+                        _buildStatChip(context, Icons.check_circle, '$graded Dinilai', Colors.green),
+                        _buildStatChip(context, Icons.pending, '$ungraded Belum', Colors.orange),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const Icon(Icons.chevron_right),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatChip(BuildContext context, IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withAlpha(50)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GuruPengumumanTab extends StatelessWidget {
+  const GuruPengumumanTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final pengumumanProvider = Provider.of<PengumumanProvider>(context);
+    final list = pengumumanProvider.pengumumanList;
+
+    if (list.isEmpty) {
+      return const EmptyState(message: 'Belum ada pengumuman.', icon: Icons.notifications_off);
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final item = list[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.judul,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Text(
+                      DateFormat('dd MMM yyyy').format(item.tanggal),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                const Divider(),
+                Text(item.isi),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

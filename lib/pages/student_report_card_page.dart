@@ -148,7 +148,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                 pw.Text('Detail Nilai Per Mata Pelajaran', style: pw.TextStyle(font: font, fontSize: 18, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 10),
                 pw.TableHelper.fromTextArray(
-                  headers: ['Mata Pelajaran', 'Semester', 'Tugas', 'UTS', 'UAS', 'Nilai Akhir', 'Predikat'],
+                  headers: ['Mata Pelajaran', 'Semester', 'Tugas', 'UTS', 'UAS', 'Kehadiran', 'Nilai Akhir', 'Predikat'],
                   data: allGrades.map((nilai) {
                     return [
                       nilai.mataPelajaran,
@@ -156,6 +156,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                       nilai.nilaiTugas.toStringAsFixed(0),
                       nilai.nilaiUTS.toStringAsFixed(0),
                       nilai.nilaiUAS.toStringAsFixed(0),
+                      nilai.nilaiKehadiran.toStringAsFixed(0),
                       nilai.nilaiAkhir.toStringAsFixed(0),
                       nilai.predikat,
                     ];
@@ -171,6 +172,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                     4: pw.Alignment.center,
                     5: pw.Alignment.center,
                     6: pw.Alignment.center,
+                    7: pw.Alignment.center,
                   },
                 ),
                 pw.SizedBox(height: 20),
@@ -356,11 +358,12 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
               border: TableBorder.all(color: Colors.grey.shade300),
               columnWidths: const {
                 0: FlexColumnWidth(3),
-                1: FlexColumnWidth(1.5),
-                2: FlexColumnWidth(1.5),
-                3: FlexColumnWidth(1.5),
-                4: FlexColumnWidth(2),
-                5: FlexColumnWidth(1),
+                1: FlexColumnWidth(1.2),
+                2: FlexColumnWidth(1.2),
+                3: FlexColumnWidth(1.2),
+                4: FlexColumnWidth(1.5),
+                5: FlexColumnWidth(1.5),
+                6: FlexColumnWidth(1),
               },
               children: [
                 TableRow(
@@ -370,8 +373,9 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                     Padding(padding: EdgeInsets.all(8.0), child: Text('Tugas', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
                     Padding(padding: EdgeInsets.all(8.0), child: Text('UTS', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
                     Padding(padding: EdgeInsets.all(8.0), child: Text('UAS', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('Nilai Akhir', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('Predikat', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
+                    Padding(padding: EdgeInsets.all(8.0), child: Text('Hadir', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
+                    Padding(padding: EdgeInsets.all(8.0), child: Text('Akhir', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
+                    Padding(padding: EdgeInsets.all(8.0), child: Text('Ket', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
                   ],
                 ),
                 ...studentGrades.map((nilai) {
@@ -381,6 +385,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                       Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiTugas.toStringAsFixed(0), textAlign: TextAlign.center)),
                       Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUTS.toStringAsFixed(0), textAlign: TextAlign.center)),
                       Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUAS.toStringAsFixed(0), textAlign: TextAlign.center)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiKehadiran.toStringAsFixed(0), textAlign: TextAlign.center)),
                       Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiAkhir.toStringAsFixed(0), textAlign: TextAlign.center)),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
