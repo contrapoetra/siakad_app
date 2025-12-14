@@ -195,14 +195,14 @@ class _KelasDialogState extends State<KelasDialog> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedTingkat,
+                  initialValue: _selectedTingkat,
                   decoration: const InputDecoration(labelText: 'Tingkat'),
                   items: _tingkatOptions.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                   onChanged: (val) => setState(() => _selectedTingkat = val!),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedJurusan,
+                  initialValue: _selectedJurusan,
                   decoration: const InputDecoration(labelText: 'Jurusan'),
                   items: _jurusanOptions.map((j) => DropdownMenuItem(value: j, child: Text(j))).toList(),
                   onChanged: (val) => setState(() => _selectedJurusan = val!),
@@ -248,7 +248,7 @@ class _KelasDialogState extends State<KelasDialog> {
                             ],
                           ),
                           DropdownButtonFormField<String>(
-                            value: mapel.guruNip.isNotEmpty && guruList.any((g) => g.nip == mapel.guruNip) ? mapel.guruNip : null,
+                            initialValue: mapel.guruNip.isNotEmpty && guruList.any((g) => g.nip == mapel.guruNip) ? mapel.guruNip : null,
                             decoration: const InputDecoration(labelText: 'Guru Pengampu'),
                             items: guruList.map((g) => DropdownMenuItem(
                               value: g.nip,

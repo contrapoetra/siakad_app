@@ -63,23 +63,25 @@ class AdminDashboard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Selamat Datang, ${authProvider.currentUsername}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Selamat Datang, ${authProvider.currentUsername}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Role: ${authProvider.currentRole}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withAlpha(178), // Changed from withOpacity
-                          ),                        ),
-                      ],
+                          Text(
+                            'Role: ${authProvider.currentRole}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurface.withAlpha(178), // Changed from withOpacity
+                            ),                        ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

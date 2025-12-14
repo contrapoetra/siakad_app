@@ -113,7 +113,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
     }
 
     // PDF generation (more sophisticated)
-    Future<void> _generateSophisticatedPdf(List<Nilai> allGrades, String sName, String sNis, Map<String, double> ipkPerSemester) async {
+    Future<void> generateSophisticatedPdf(List<Nilai> allGrades, String sName, String sNis, Map<String, double> ipkPerSemester) async {
       final pdf = pw.Document();
       final font = await PdfGoogleFonts.nunitoExtraLight();
 
@@ -202,7 +202,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () => _generateSophisticatedPdf(studentGrades, studentName, currentSiswaNis, ipkPerSemester),
+            onPressed: () => generateSophisticatedPdf(studentGrades, studentName, currentSiswaNis, ipkPerSemester),
           ),
         ],
       ),
@@ -395,7 +395,7 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                       ),
                     ],
                   );
-                }).toList(),
+                }),
               ],
             ),
           ],

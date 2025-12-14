@@ -80,7 +80,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: selectedNis,
+                      initialValue: selectedNis,
                       decoration: InputDecoration(
                         labelText: 'Pilih Siswa',
                         border: const OutlineInputBorder(
@@ -107,7 +107,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: selectedMataPelajaran,
+                      initialValue: selectedMataPelajaran,
                       decoration: InputDecoration(
                         labelText: 'Pilih Mata Pelajaran',
                         border: const OutlineInputBorder(
@@ -134,7 +134,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: selectedSemester,
+                      initialValue: selectedSemester,
                       decoration: InputDecoration(
                         labelText: 'Pilih Semester',
                         border: const OutlineInputBorder(

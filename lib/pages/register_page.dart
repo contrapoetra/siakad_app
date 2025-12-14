@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:math'; // Import Random
 import '../providers/auth_provider.dart';
 import '../widgets/custom_input.dart';
 import '../routes.dart';
@@ -24,18 +25,24 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
-    _generateNisForSiswa();
+    _generateNomorInduk();
   }
 
-  void _generateNisForSiswa() {
+  void _generateNomorInduk() {
+    final random = Random();
     if (_selectedRole == 'Siswa') {
-      final uniqueNis = DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
-      _nomorIndukController.text = uniqueNis;
+      // Pattern: 2024 + 3 random digits
+      final uniqueSuffix = (random.nextInt(999) + 1).toString().padLeft(3, '0');
+      _nomorIndukController.text = '2024$uniqueSuffix';
+    } else if (_selectedRole == 'Guru') {
+      // Pattern based on dummy data: 198501012010011001
+      // Randomize year slightly (1980-1989) and suffix
+      final year = 1980 + random.nextInt(10);
+      final uniqueSuffix = (random.nextInt(999) + 1).toString().padLeft(3, '0');
+      _nomorIndukController.text = '${year}01012010011$uniqueSuffix';
     } else {
-      // Only clear if the previous role was Siswa and we are switching away
-      if (_nomorIndukController.text.isNotEmpty && _selectedRole == 'Siswa') {
-        _nomorIndukController.clear();
-      }
+      // Admin or other: Just generate a unique ID
+       _nomorIndukController.text = DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
     }
   }
 
@@ -49,9 +56,9 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _register() async {
-    // Ensure _nomorIndukController.text is set for Siswa before validation
-    if (_selectedRole == 'Siswa' && _nomorIndukController.text.isEmpty) {
-      _generateNisForSiswa(); // Regenerate if somehow empty
+    // Ensure _nomorIndukController.text is set
+    if (_nomorIndukController.text.isEmpty) {
+      _generateNomorInduk();
     }
 
     if (_formKey.currentState!.validate()) {
@@ -149,14 +156,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       CustomInput(
                         label: 'NIS/NIP',
                         controller: _nomorIndukController,
-                        enabled: _selectedRole != 'Siswa',
+                        enabled: false, // Always disabled/read-only as it is auto-generated
                         validator: (value) {
-                          if (_selectedRole != 'Siswa') { // Only validate if not Siswa (i.e., field is enabled)
-                            if (value == null || value.isEmpty) {
+                           // Since it's disabled and auto-generated, we just check if it's empty which shouldn't happen
+                           if (value == null || value.isEmpty) {
                               return 'NIS/NIP tidak boleh kosong';
-                            }
-                          }
-                          return null;
+                           }
+                           return null;
                         },
                       ),
                       CustomInput(
@@ -193,7 +199,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         onChanged: (String? newValue) {
                           setState(() {
                             _selectedRole = newValue!;
-                            _generateNisForSiswa(); // Call when role changes
+                            _generateNomorInduk(); // Call when role changes
                           });
                         },
                       ),

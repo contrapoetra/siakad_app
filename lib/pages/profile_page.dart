@@ -109,8 +109,14 @@ class _ProfilePageState extends State<ProfilePage> {
     final currentGuru = guruProvider.getGuruByNip(_currentNisNip);
     newNipController.text = currentGuru?.nip ?? '';
 
+    // Capture context-dependent objects before the async gap in showDialog
+    final BuildContext dialogContext = context;
+    final ScaffoldMessengerState scaffoldMessenger = ScaffoldMessenger.of(dialogContext);
+    final NavigatorState navigator = Navigator.of(dialogContext);
+
+
     await showDialog(
-      context: context,
+      context: dialogContext,
       builder: (context) {
         return AlertDialog(
           title: const Text('Kelola NIP'),
@@ -127,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => navigator.pop(),
               child: const Text('Batal'),
             ),
             ElevatedButton(
@@ -139,8 +145,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Update Guru's NIP
                   final guruUpdated = await guruProvider.updateGuruNip(oldNip, newNip);
                   if (!guruUpdated) {
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gagal memperbarui NIP Guru.')));
-                    if (mounted) Navigator.pop(context);
+                    if (mounted) scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Gagal memperbarui NIP Guru.')));
+                    if (mounted) navigator.pop();
                     return;
                   }
 
@@ -148,12 +154,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   await authProvider.updateUserNomorInduk(oldNip, newNip);
                   
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('NIP berhasil diperbarui!')));
+                  scaffoldMessenger.showSnackBar(const SnackBar(content: Text('NIP berhasil diperbarui!')));
                   setState(() {
                     _currentNisNip = newNip; // Update local state
                   });
-                  if (!mounted) return; // Add another guard before Navigator.pop
-                  Navigator.pop(context);
+                  if (!mounted) return; 
+                  navigator.pop();
                 }
               },
               child: const Text('Simpan'),

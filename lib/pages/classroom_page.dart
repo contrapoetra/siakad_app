@@ -62,11 +62,11 @@ class _ClassroomPageState extends State<ClassroomPage> {
           bottom: TabBar(
             isScrollable: true,
             tabs: [
-              const Tab(text: 'Stream', icon: Icon(Icons.dashboard)),
-              const Tab(text: 'Classwork', icon: Icon(Icons.assignment)),
-              const Tab(text: 'People', icon: Icon(Icons.people)),
-              if (isTeacher) const Tab(text: 'Grades', icon: Icon(Icons.grade)),
-              const Tab(text: 'Absensi', icon: Icon(Icons.check_circle_outline)), // New Absensi tab
+              Tab(text: 'Stream', icon: Icon(Icons.dashboard, color: Theme.of(context).colorScheme.onSurface)),
+              Tab(text: 'Classwork', icon: Icon(Icons.assignment, color: Theme.of(context).colorScheme.onSurface)),
+              Tab(text: 'People', icon: Icon(Icons.people, color: Theme.of(context).colorScheme.onSurface)),
+              if (isTeacher) Tab(text: 'Grades', icon: Icon(Icons.grade, color: Theme.of(context).colorScheme.onSurface)),
+              Tab(text: 'Absensi', icon: Icon(Icons.check_circle_outline, color: Theme.of(context).colorScheme.onSurface)), // New Absensi tab
             ],
           ),
         ),

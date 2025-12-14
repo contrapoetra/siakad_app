@@ -195,7 +195,7 @@ class _SiswaDashboardState extends State<SiswaDashboard> {
                         if (siswaKelas != null && siswaKelas.mataPelajaranList.isNotEmpty) // Only show if student is in a class with subjects
                           ...siswaKelas.mataPelajaranList.map((mapel) {
                                 return _buildSubjectCard(context, siswaKelas, mapel);
-                              }).toList(),
+                              }),
                         if (siswaKelas == null || siswaKelas.mataPelajaranList.isEmpty) // Show EmptyState if no class or no subjects
                           const EmptyState(message: 'Anda belum terdaftar di mata pelajaran manapun.', icon: Icons.school),
                       ],
