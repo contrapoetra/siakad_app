@@ -13,8 +13,8 @@ class JadwalProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  List<Jadwal> getJadwalByKelas(String kelas) {
-    return _service.getJadwalByKelas(kelas);
+  List<Jadwal> getJadwalByKelas(String kelasId) {
+    return _service.getJadwalByKelas(kelasId);
   }
 
   Future<void> addJadwal(Jadwal jadwal) async {

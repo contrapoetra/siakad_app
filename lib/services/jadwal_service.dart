@@ -10,8 +10,8 @@ class JadwalService {
     return _box.values.toList();
   }
 
-  List<Jadwal> getJadwalByKelas(String kelas) {
-    return _box.values.where((jadwal) => jadwal.kelas == kelas).toList();
+  List<Jadwal> getJadwalByKelas(String kelasId) {
+    return _box.values.where((jadwal) => jadwal.kelasId == kelasId).toList();
   }
 
   Future<void> addJadwal(Jadwal jadwal) async {

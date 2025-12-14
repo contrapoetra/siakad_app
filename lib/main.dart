@@ -81,7 +81,15 @@ class MyApp extends StatelessWidget {
                             surfaceTintColor: Colors.transparent, // Use surfaceTintColor
                             iconTheme: const IconThemeData(color: Color(0xFF24292E)),
                             shape: const Border(bottom: BorderSide(color: Color(0xFFE1E4E8), width: 1)),
-                          ),              inputDecorationTheme: InputDecorationTheme(
+                          ),
+              tabBarTheme: TabBarThemeData(
+                labelColor: const Color(0xFF24292E),
+                unselectedLabelColor: const Color(0xFF6A737D),
+                indicatorColor: const Color(0xFFFD8C73),
+                labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: const Color(0xFFF6F8FA), // Light grey fill
                 border: OutlineInputBorder(
@@ -249,6 +257,13 @@ class MyApp extends StatelessWidget {
                   color: const Color(0xFFC9D1D9),
                   letterSpacing: 0.5,
                 ),
+              ),
+              tabBarTheme: TabBarThemeData(
+                labelColor: const Color(0xFFC9D1D9),
+                unselectedLabelColor: const Color(0xFF8B949E),
+                indicatorColor: const Color(0xFF58A6FF),
+                labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500),
               ),
               cardTheme: CardThemeData(
                 color: const Color(0xFF161B22),
