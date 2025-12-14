@@ -102,7 +102,12 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
     for (int i = 0; i < sortedSemesters.length; i++) {
       final semester = sortedSemesters[i];
       final gradesInSemester = gradesBySemester[semester]!;
-      final averageGrade = gradesInSemester.map((n) => n.nilaiAkhir).reduce((a, b) => a + b) / gradesInSemester.length;
+      
+      final gradedSubjects = gradesInSemester.where((n) => n.nilaiAkhir != null).toList();
+      double averageGrade = 0;
+      if (gradedSubjects.isNotEmpty) {
+        averageGrade = gradedSubjects.map((n) => n.nilaiAkhir!).reduce((a, b) => a + b) / gradedSubjects.length;
+      }
       
       spots.add(FlSpot(i.toDouble(), averageGrade));
       semesterLabels.add(semester);
@@ -153,11 +158,11 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                     return [
                       nilai.mataPelajaran,
                       nilai.semester,
-                      nilai.nilaiTugas.toStringAsFixed(0),
-                      nilai.nilaiUTS.toStringAsFixed(0),
-                      nilai.nilaiUAS.toStringAsFixed(0),
-                      nilai.nilaiKehadiran.toStringAsFixed(0),
-                      nilai.nilaiAkhir.toStringAsFixed(0),
+                      nilai.nilaiTugas?.toStringAsFixed(0) ?? '-',
+                      nilai.nilaiUTS?.toStringAsFixed(0) ?? '-',
+                      nilai.nilaiUAS?.toStringAsFixed(0) ?? '-',
+                      nilai.nilaiKehadiran?.toStringAsFixed(0) ?? '-',
+                      nilai.nilaiAkhir?.toStringAsFixed(0) ?? '-',
                       nilai.predikat,
                     ];
                   }).toList(),
@@ -193,7 +198,11 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
     Map<String, double> ipkPerSemester = {};
     for (var semester in sortedSemesters) {
       final gradesInSemester = gradesBySemester[semester]!;
-      final averageGrade = gradesInSemester.map((n) => n.nilaiAkhir).reduce((a, b) => a + b) / gradesInSemester.length;
+      final gradedSubjects = gradesInSemester.where((n) => n.nilaiAkhir != null).toList();
+      double averageGrade = 0;
+      if (gradedSubjects.isNotEmpty) {
+        averageGrade = gradedSubjects.map((n) => n.nilaiAkhir!).reduce((a, b) => a + b) / gradedSubjects.length;
+      }
       ipkPerSemester[semester] = averageGrade;
     }
 
@@ -382,11 +391,11 @@ class _StudentReportCardPageState extends State<StudentReportCardPage> {
                   return TableRow(
                     children: [
                       Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.mataPelajaran)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiTugas.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUTS.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUAS.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiKehadiran.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiAkhir.toStringAsFixed(0), textAlign: TextAlign.center)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiTugas?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUTS?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUAS?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiKehadiran?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiAkhir?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center)),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(

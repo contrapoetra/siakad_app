@@ -231,8 +231,15 @@ class SiswaHomeTab extends StatelessWidget {
   }
 }
 
-class SiswaRaporTab extends StatelessWidget {
+class SiswaRaporTab extends StatefulWidget {
   const SiswaRaporTab({super.key});
+
+  @override
+  State<SiswaRaporTab> createState() => _SiswaRaporTabState();
+}
+
+class _SiswaRaporTabState extends State<SiswaRaporTab> {
+  String? _selectedSemester;
 
   Color _getPredikatColor(String predikat) {
     switch (predikat) {
@@ -260,7 +267,7 @@ class SiswaRaporTab extends StatelessWidget {
               pw.Text('Nama Siswa: $sName', style: pw.TextStyle(font: font, fontSize: 16)),
               pw.Text('NIS: $sNis', style: pw.TextStyle(font: font, fontSize: 16)),
               pw.SizedBox(height: 30),
-              pw.Text('IPK Per Semester', style: pw.TextStyle(font: font, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Ringkasan IPK', style: pw.TextStyle(font: font, fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
               pw.TableHelper.fromTextArray(
                 headers: ['Semester', 'IPK'],
@@ -276,19 +283,19 @@ class SiswaRaporTab extends StatelessWidget {
                 },
               ),
               pw.SizedBox(height: 30),
-              pw.Text('Detail Nilai Per Mata Pelajaran', style: pw.TextStyle(font: font, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Detail Nilai Akademik', style: pw.TextStyle(font: font, fontSize: 18, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 10),
               pw.TableHelper.fromTextArray(
-                headers: ['Mata Pelajaran', 'Semester', 'Tugas', 'UTS', 'UAS', 'Kehadiran', 'Nilai Akhir', 'Predikat'],
+                headers: ['Semester', 'Mata Pelajaran', 'Tugas', 'UTS', 'UAS', 'Kehadiran', 'Akhir', 'Predikat'],
                 data: allGrades.map((nilai) {
                   return [
-                    nilai.mataPelajaran,
                     nilai.semester,
-                    nilai.nilaiTugas.toStringAsFixed(0),
-                    nilai.nilaiUTS.toStringAsFixed(0),
-                    nilai.nilaiUAS.toStringAsFixed(0),
-                    nilai.nilaiKehadiran.toStringAsFixed(0),
-                    nilai.nilaiAkhir.toStringAsFixed(0),
+                    nilai.mataPelajaran,
+                    nilai.nilaiTugas?.toStringAsFixed(0) ?? '-',
+                    nilai.nilaiUTS?.toStringAsFixed(0) ?? '-',
+                    nilai.nilaiUAS?.toStringAsFixed(0) ?? '-',
+                    nilai.nilaiKehadiran?.toStringAsFixed(0) ?? '-',
+                    nilai.nilaiAkhir?.toStringAsFixed(0) ?? '-',
                     nilai.predikat,
                   ];
                 }).toList(),
@@ -297,7 +304,7 @@ class SiswaRaporTab extends StatelessWidget {
                 cellStyle: pw.TextStyle(font: font),
                 cellAlignments: {
                   0: pw.Alignment.centerLeft,
-                  1: pw.Alignment.center,
+                  1: pw.Alignment.centerLeft,
                   2: pw.Alignment.center,
                   3: pw.Alignment.center,
                   4: pw.Alignment.center,
@@ -352,6 +359,11 @@ class SiswaRaporTab extends StatelessWidget {
       return aNum.compareTo(bNum);
     });
 
+    // Initialize selected semester to the latest one if not set
+    if (_selectedSemester == null && sortedSemesters.isNotEmpty) {
+      _selectedSemester = sortedSemesters.last;
+    }
+
     List<FlSpot> spots = [];
     List<String> semesterLabels = [];
     double maxAverageGrade = 0;
@@ -360,7 +372,13 @@ class SiswaRaporTab extends StatelessWidget {
     for (int i = 0; i < sortedSemesters.length; i++) {
       final semester = sortedSemesters[i];
       final gradesInSemester = gradesBySemester[semester]!;
-      final averageGrade = gradesInSemester.map((n) => n.nilaiAkhir).reduce((a, b) => a + b) / gradesInSemester.length;
+      
+      // Calculate IPK based on graded subjects only
+      final gradedSubjects = gradesInSemester.where((n) => n.nilaiAkhir != null).toList();
+      double averageGrade = 0;
+      if (gradedSubjects.isNotEmpty) {
+        averageGrade = gradedSubjects.map((n) => n.nilaiAkhir!).reduce((a, b) => a + b) / gradedSubjects.length;
+      }
       
       spots.add(FlSpot(i.toDouble(), averageGrade));
       semesterLabels.add(semester);
@@ -380,37 +398,7 @@ class SiswaRaporTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'IPK Per Semester',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 10),
-            Table(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columnWidths: const {
-                0: FlexColumnWidth(1),
-                1: FlexColumnWidth(1),
-              },
-              children: [
-                TableRow(
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.1).round())),
-                  children: const [
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('Semester', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('IPK', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                  ],
-                ),
-                ...ipkPerSemester.entries.map((entry) {
-                  return TableRow(
-                    children: [
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(entry.key, textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(entry.value.toStringAsFixed(2), textAlign: TextAlign.center)),
-                    ],
-                  );
-                }),
-              ],
-            ),
-            const SizedBox(height: 30),
-            Text(
-              'Tren IPK',
+              'Ringkasan Akademik',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 20),
@@ -428,9 +416,10 @@ class SiswaRaporTab extends StatelessWidget {
                           reservedSize: 30,
                           getTitlesWidget: (value, meta) {
                              if (value.toInt() >= 0 && value.toInt() < semesterLabels.length) {
+                                final label = semesterLabels[value.toInt()].replaceAll('Semester ', '');
                                 return SideTitleWidget(
                                   axisSide: meta.axisSide,
-                                  child: Text(semesterLabels[value.toInt()], style: const TextStyle(fontSize: 10)),
+                                  child: Text(label, style: const TextStyle(fontSize: 10)),
                                 );
                              }
                              return const SizedBox.shrink();
@@ -461,60 +450,115 @@ class SiswaRaporTab extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 30),
-            Text(
-              'Detail Nilai',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 20),
-            Table(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columnWidths: const {
-                0: FlexColumnWidth(3), // Mapel
-                1: FlexColumnWidth(1.2), // Tugas
-                2: FlexColumnWidth(1.2), // UTS
-                3: FlexColumnWidth(1.2), // UAS
-                4: FlexColumnWidth(1.5), // Kehadiran
-                5: FlexColumnWidth(1.5), // Akhir
-                6: FlexColumnWidth(1), // Ket
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TableRow(
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.1).round())),
-                  children: const [
-                    Padding(padding: EdgeInsets.all(8.0), child: Text('Mapel', style: TextStyle(fontWeight: FontWeight.bold))),
-                    Padding(padding: EdgeInsets.all(4.0), child: Text('Tgs', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(4.0), child: Text('UTS', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(4.0), child: Text('UAS', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(4.0), child: Text('Hdr', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(4.0), child: Text('Akh', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                    Padding(padding: EdgeInsets.all(4.0), child: Text('Ket', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                  ],
+                Text(
+                  'Detail Nilai',
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                ...studentGrades.map((nilai) {
-                  return TableRow(
-                    children: [
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.mataPelajaran)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiTugas.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUTS.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUAS.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiKehadiran.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiAkhir.toStringAsFixed(0), textAlign: TextAlign.center)),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          nilai.predikat,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: _getPredikatColor(nilai.predikat),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
+                DropdownButton<String>(
+                  value: _selectedSemester,
+                  items: sortedSemesters.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedSemester = newValue;
+                    });
+                  },
+                ),
               ],
             ),
+            const SizedBox(height: 10),
+            if (_selectedSemester != null && gradesBySemester.containsKey(_selectedSemester))
+              Builder(
+                builder: (context) {
+                  final semester = _selectedSemester!;
+                  final grades = gradesBySemester[semester]!;
+                  final ipk = ipkPerSemester[semester]!;
+                  
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 24),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                semester,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              Chip(
+                                label: Text('IPK: ${ipk.toStringAsFixed(2)}'),
+                                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                              ),
+                            ],
+                          ),
+                          const Divider(),
+                          Table(
+                            border: TableBorder.all(color: Colors.grey.shade300),
+                            columnWidths: const {
+                              0: FlexColumnWidth(3), // Mapel
+                              1: FlexColumnWidth(1.2), // Tugas
+                              2: FlexColumnWidth(1.2), // UTS
+                              3: FlexColumnWidth(1.2), // UAS
+                              4: FlexColumnWidth(1.2), // Hdr
+                              5: FlexColumnWidth(1.5), // Akhir
+                              6: FlexColumnWidth(1), // Ket
+                            },
+                            children: [
+                              TableRow(
+                                decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withAlpha((255 * 0.1).round())),
+                                children: const [
+                                  Padding(padding: EdgeInsets.all(8.0), child: Text('Mapel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                                  Padding(padding: EdgeInsets.all(4.0), child: Text('Tgs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
+                                  Padding(padding: EdgeInsets.all(4.0), child: Text('UTS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
+                                  Padding(padding: EdgeInsets.all(4.0), child: Text('UAS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
+                                  Padding(padding: EdgeInsets.all(4.0), child: Text('Hdr', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
+                                  Padding(padding: EdgeInsets.all(4.0), child: Text('Akh', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
+                                  Padding(padding: EdgeInsets.all(4.0), child: Text('Ket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12), textAlign: TextAlign.center)),
+                                ],
+                              ),
+                              ...grades.map((nilai) {
+                                return TableRow(
+                                  children: [
+                                                                    Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.mataPelajaran, style: const TextStyle(fontSize: 12))),
+                                                                    Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiTugas?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12))),
+                                                                    Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUTS?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12))),
+                                                                    Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiUAS?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12))),
+                                                                    Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiKehadiran?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12))),
+                                                                    Padding(padding: const EdgeInsets.all(8.0), child: Text(nilai.nilaiAkhir?.toStringAsFixed(0) ?? '-', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+                                    
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        nilai.predikat,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: _getPredikatColor(nilai.predikat),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              ),
           ],
         ),
       ),

@@ -22,10 +22,10 @@ class NilaiAdapter extends TypeAdapter<Nilai> {
       namaSiswa: fields[1] as String,
       mataPelajaran: fields[2] as String,
       semester: fields[3] as String,
-      nilaiTugas: fields[4] as double,
-      nilaiUTS: fields[5] as double,
-      nilaiUAS: fields[6] as double,
-      nilaiKehadiran: fields[8] as double,
+      nilaiTugas: fields[4] as double?,
+      nilaiUTS: fields[5] as double?,
+      nilaiUAS: fields[6] as double?,
+      nilaiKehadiran: fields[8] as double?,
     );
   }
 

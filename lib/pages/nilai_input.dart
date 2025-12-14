@@ -432,7 +432,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Tugas:'),
-                                Text(nilai.nilaiTugas.toStringAsFixed(1)),
+                                Text(nilai.nilaiTugas?.toStringAsFixed(1) ?? '-'),
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -440,7 +440,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('UTS:'),
-                                Text(nilai.nilaiUTS.toStringAsFixed(1)),
+                                Text(nilai.nilaiUTS?.toStringAsFixed(1) ?? '-'),
                               ],
                             ),
                             const SizedBox(height: 8),
@@ -448,7 +448,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('UAS:'),
-                                Text(nilai.nilaiUAS.toStringAsFixed(1)),
+                                Text(nilai.nilaiUAS?.toStringAsFixed(1) ?? '-'),
                               ],
                             ),
                             const Divider(),
@@ -460,7 +460,7 @@ class _NilaiInputPageState extends State<NilaiInputPage> {
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  nilai.nilaiAkhir.toStringAsFixed(2),
+                                  nilai.nilaiAkhir?.toStringAsFixed(2) ?? '-',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold),
                                 ),

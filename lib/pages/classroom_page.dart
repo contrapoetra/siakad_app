@@ -186,10 +186,10 @@ class _InputNilaiViewState extends State<InputNilaiView> {
                   namaSiswa: siswa.nama,
                   mataPelajaran: widget.mataPelajaran.nama,
                   semester: _selectedSemester,
-                  nilaiTugas: 0,
-                  nilaiUTS: 0,
-                  nilaiUAS: 0,
-                  nilaiKehadiran: 0,
+                  nilaiTugas: null,
+                  nilaiUTS: null,
+                  nilaiUAS: null,
+                  nilaiKehadiran: null,
                 ),
               );
 
@@ -247,10 +247,10 @@ class _NilaiInputCardState extends State<NilaiInputCard> {
   }
 
   void _initControllers() {
-    _tugasController = TextEditingController(text: widget.initialNilai.nilaiTugas == 0 ? '' : widget.initialNilai.nilaiTugas.toStringAsFixed(0));
-    _utsController = TextEditingController(text: widget.initialNilai.nilaiUTS == 0 ? '' : widget.initialNilai.nilaiUTS.toStringAsFixed(0));
-    _uasController = TextEditingController(text: widget.initialNilai.nilaiUAS == 0 ? '' : widget.initialNilai.nilaiUAS.toStringAsFixed(0));
-    _kehadiranController = TextEditingController(text: widget.initialNilai.nilaiKehadiran == 0 ? '' : widget.initialNilai.nilaiKehadiran.toStringAsFixed(0));
+    _tugasController = TextEditingController(text: widget.initialNilai.nilaiTugas?.toStringAsFixed(0) ?? '');
+    _utsController = TextEditingController(text: widget.initialNilai.nilaiUTS?.toStringAsFixed(0) ?? '');
+    _uasController = TextEditingController(text: widget.initialNilai.nilaiUAS?.toStringAsFixed(0) ?? '');
+    _kehadiranController = TextEditingController(text: widget.initialNilai.nilaiKehadiran?.toStringAsFixed(0) ?? '');
   }
 
   @override
@@ -265,10 +265,15 @@ class _NilaiInputCardState extends State<NilaiInputCard> {
   void _saveNilai() async {
     final nilaiProvider = Provider.of<NilaiProvider>(context, listen: false);
     
-    final tugas = double.tryParse(_tugasController.text) ?? 0;
-    final uts = double.tryParse(_utsController.text) ?? 0;
-    final uas = double.tryParse(_uasController.text) ?? 0;
-    final kehadiran = double.tryParse(_kehadiranController.text) ?? 0;
+    double? parseInput(String text) {
+      if (text.isEmpty) return null;
+      return double.tryParse(text);
+    }
+
+    final tugas = parseInput(_tugasController.text);
+    final uts = parseInput(_utsController.text);
+    final uas = parseInput(_uasController.text);
+    final kehadiran = parseInput(_kehadiranController.text);
 
     final newNilai = Nilai(
       id: widget.initialNilai.id, // Keep ID if updating
@@ -308,22 +313,33 @@ class _NilaiInputCardState extends State<NilaiInputCard> {
   @override
   Widget build(BuildContext context) {
     // Calculate preview of final score
-    double tugas = double.tryParse(_tugasController.text) ?? 0;
-    double uts = double.tryParse(_utsController.text) ?? 0;
-    double uas = double.tryParse(_uasController.text) ?? 0;
-    double kehadiran = double.tryParse(_kehadiranController.text) ?? 0;
+    double? parseInput(String text) {
+      if (text.isEmpty) return null;
+      return double.tryParse(text);
+    }
+
+    final tugas = parseInput(_tugasController.text);
+    final uts = parseInput(_utsController.text);
+    final uas = parseInput(_uasController.text);
+    final kehadiran = parseInput(_kehadiranController.text);
     
     // 10% Kehadiran, 20% Tugas, 30% UTS, 40% UAS
-    double finalScore = (kehadiran * 0.1) + (tugas * 0.2) + (uts * 0.3) + (uas * 0.4);
-    String predikat = '';
-    if (finalScore >= 85) predikat = 'A';
-    else if (finalScore >= 75) predikat = 'B';
-    else if (finalScore >= 65) predikat = 'C';
-    else predikat = 'D';
+    String predikat = '-';
+    double? finalScore;
+    
+    if (tugas != null && uts != null && uas != null && kehadiran != null) {
+      finalScore = (kehadiran * 0.1) + (tugas * 0.2) + (uts * 0.3) + (uas * 0.4);
+      if (finalScore >= 85) predikat = 'A';
+      else if (finalScore >= 75) predikat = 'B';
+      else if (finalScore >= 65) predikat = 'C';
+      else predikat = 'D';
+    }
 
-    Color scoreColor = Colors.green;
-    if (predikat == 'C') scoreColor = Colors.orange;
-    if (predikat == 'D') scoreColor = Colors.red;
+    Color scoreColor = Colors.grey;
+    if (predikat == 'A') scoreColor = Colors.green;
+    else if (predikat == 'B') scoreColor = Colors.blue;
+    else if (predikat == 'C') scoreColor = Colors.orange;
+    else if (predikat == 'D') scoreColor = Colors.red;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -335,7 +351,7 @@ class _NilaiInputCardState extends State<NilaiInputCard> {
           child: Text(predikat, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         title: Text(widget.siswa.nama),
-        subtitle: Text('Akhir: ${finalScore.toStringAsFixed(1)}'),
+        subtitle: Text('Akhir: ${finalScore?.toStringAsFixed(1) ?? '-'}'),
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),

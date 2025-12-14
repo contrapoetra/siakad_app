@@ -92,32 +92,63 @@ class DummyDataService {
     // Add dummy guru to box
     await guruBox.addAll(dummyGuru);
 
-    // 2. Generate Classes (Kelas)
-    // We will create 6 classes: X IPA 1, X IPS 1, XI IPA 1, XI IPS 1, XII IPA 1, XII IPS 1
+    // 2. Define Semester Subjects Mapping
+    // 2 Subjects per Semester, No repeats.
+    // X: Sem 1, 2
+    // XI: Sem 3, 4
+    // XII: Sem 5, 6
+    final Map<int, List<String>> semesterSubjects = {
+      1: ['Matematika X-1', 'Bahasa Indonesia X-1', 'Fisika X-1', 'Biologi X-1'],
+      2: ['Matematika X-2', 'Bahasa Inggris X-2', 'Kimia X-2', 'Sejarah X-2'],
+      3: ['Matematika XI-1', 'Bahasa Indonesia XI-1', 'Fisika XI-1', 'Ekonomi XI-1'],
+      4: ['Matematika XI-2', 'Bahasa Inggris XI-2', 'Kimia XI-2', 'Sosiologi XI-2'],
+      5: ['Matematika XII-1', 'Bahasa Indonesia XII-1', 'Fisika XII-1', 'Geografi XII-1'],
+      6: ['Matematika XII-2', 'Bahasa Inggris XII-2', 'Kimia XII-2', 'Seni Budaya XII-2'],
+    };
+
+    // Helper to get random teacher
+    Guru getRandomGuru() => dummyGuru[DateTime.now().microsecond % dummyGuru.length];
+
+    // 3. Generate Classes (Kelas)
+    // Classes contain subjects relevant to their level (e.g. X contains Sem 1 & 2 subjects)
     final List<Kelas> dummyKelas = [];
     final levels = ['X', 'XI', 'XII'];
     final majors = ['IPA', 'IPS'];
     
-    // Helper to get random teacher
-    Guru getRandomGuru() => dummyGuru[DateTime.now().microsecond % dummyGuru.length];
-
     int classIdCounter = 1;
     for (var level in levels) {
       for (var major in majors) {
         final className = '$level $major 1';
         final subjects = <MataPelajaran>[];
         
-        // Add some subjects
-        final subjectNames = ['Matematika', 'Bahasa Indonesia', 'Bahasa Inggris', major == 'IPA' ? 'Fisika' : 'Ekonomi', major == 'IPA' ? 'Biologi' : 'Sosiologi'];
-        
-        for (var subjName in subjectNames) {
-          final teacher = getRandomGuru();
-          subjects.add(MataPelajaran(
-            id: 'mapel_${classIdCounter}_${subjects.length}',
-            nama: subjName,
-            guruNip: teacher.nip,
-            guruNama: teacher.nama,
-          ));
+        // Determine semesters for this level
+        List<int> semesters = [];
+        if (level == 'X') semesters = [1, 2];
+        else if (level == 'XI') semesters = [3, 4];
+        else if (level == 'XII') semesters = [5, 6];
+
+        // Add subjects from these semesters to the class
+        for (var sem in semesters) {
+          final semSubjects = semesterSubjects[sem] ?? [];
+          for (int i = 0; i < semSubjects.length; i++) {
+             final subjName = semSubjects[i];
+             
+             // Force specific teacher for demonstration purposes
+             // For Kelas 3 (XI IPA 1), Subject in Sem 3 (Matematika XI-1), assign to Dr. Rina (1985...)
+             Guru teacher;
+             if (classIdCounter == 3 && sem == 3 && i == 0) {
+               teacher = dummyGuru[0]; // 198501012010011001
+             } else {
+               teacher = getRandomGuru();
+             }
+
+             subjects.add(MataPelajaran(
+               id: 'mapel_${classIdCounter}_${subjName.replaceAll(' ', '_')}',
+               nama: subjName,
+               guruNip: teacher.nip,
+               guruNama: teacher.nama,
+             ));
+          }
         }
 
         dummyKelas.add(Kelas(
@@ -135,7 +166,7 @@ class DummyDataService {
     await kelasBox.addAll(dummyKelas);
 
 
-    // 3. Generate Siswa data (at least 10 per class)
+    // 4. Generate Siswa data (at least 10 per class)
     final List<Siswa> dummySiswa = [];
     final List<String> studentFirstNames = [
       'Ahmad', 'Siti', 'Budi', 'Dewi', 'Faisal', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika',
@@ -147,15 +178,27 @@ class DummyDataService {
       'Hakim', 'Indah', 'Ramadhani', 'Setiana', 'Ayu', 'Akbar', 'Fitri', 'Dewi', 'Hidayat', 'Said',
       'Amelia', 'Negara', 'Putri', 'Susanti', 'Arifin', 'Suryani', 'Pratama', 'Fitriani', 'Subroto', 'Ningsih'
     ];
-    
+    final placesOfBirthSiswa = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Makassar'];
+
     int studentCount = 0;
     for (var kelas in dummyKelas) {
       for (int i = 0; i < 15; i++) { // 15 students per class
-        final nis = '2024${(studentCount + 1).toString().padLeft(3, '0')}';
+        String nis;
+        // Place Ahmad Rizki (2024001) in Kelas 3 (XI IPA 1) as the first student
+        if (kelas.id == 'kelas_3' && i == 0) {
+          nis = '2024001';
+        } else {
+          // Generate other NIS, ensuring we don't duplicate 2024001
+          // We can just increment from a base, skipping 2024001 effectively if we start elsewhere or handle it.
+          // Simple approach: Use counter but mapping 0->2024001 handled above.
+          // Just ensure uniqueness.
+          nis = '2024${(studentCount + 2).toString().padLeft(3, '0')}'; 
+        }
+
         final name = '${studentFirstNames[studentCount % studentFirstNames.length]} ${studentLastNames[studentCount % studentLastNames.length]}';
         final email = '${name.toLowerCase().replaceAll(' ', '.')}${studentCount + 1}@example.com';
         final dob = DateTime(2007 - (i % 2), (i % 12) + 1, (i % 28) + 1);
-        final pob = placesOfBirth[i % placesOfBirth.length];
+        final pob = placesOfBirthSiswa[i % placesOfBirthSiswa.length];
         final father = 'Ayah ${name.split(' ')[0]}';
         final mother = 'Ibu ${name.split(' ')[0]}';
         
@@ -178,7 +221,7 @@ class DummyDataService {
     // Add dummy siswa to box
     await siswaBox.addAll(dummySiswa);
 
-    // 4. Generate User data from Siswa and Guru
+    // 5. Generate User data from Siswa and Guru
     await userBox.add(User(nomorInduk: 'admin', password: 'admin123', role: 'Admin', email: 'admin@example.com', isPasswordSet: true, name: 'Administrator')); // Admin user
 
     for (var siswa in dummySiswa) {
@@ -203,12 +246,17 @@ class DummyDataService {
       ));
     }
 
-    // 5. Generate Dummy Jadwal
+    // 6. Generate Dummy Jadwal
     final List<Jadwal> dummyJadwal = [];
     final days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
     final timeSlots = ['07:00-08:30', '08:30-10:00', '10:00-11:30', '13:00-14:30'];
     
     for (var kelas in dummyKelas) {
+      // Create schedule only for subjects in the "current" semester (e.g., odd semester for simplicity: 1, 3, 5)
+      // To simulate active classes
+      // Also maybe Sem 2, 4, 6 if we assume full year schedule? 
+      // Let's just schedule ALL subjects in the class for now to ensure populated dashboard
+      
       for (var mapel in kelas.mataPelajaranList) {
         final day = days[kelas.id.hashCode % days.length]; // Simple hash to assign day
         final time = timeSlots[mapel.nama.hashCode % timeSlots.length]; // Simple hash to assign time
@@ -227,48 +275,60 @@ class DummyDataService {
     await jadwalBox.addAll(dummyJadwal);
 
 
-    // 6. Generate Dummy Materi
-    // LMS features scrapped. We clear the box but do not generate data.
-    // await materiBox.addAll(dummyMateri);
-
-
-    // 7. Generate Dummy Tugas and Submissions
-    // LMS features scrapped. We clear the box but do not generate data.
-    // await tugasBox.addAll(dummyTugas);
-    // await submissionBox.addAll(dummySubmissions);
-
-    // 8. Generate Dummy Nilai (Grades)
+    // 7. Generate Dummy Nilai (Grades)
     final List<Nilai> dummyNilai = [];
     final random = Random();
-    final List<String> semesterOptions = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6'];
 
-    // Iterate through a subset of students and subjects to create grades
+    // Iterate through students
     for (var siswa in dummySiswa) {
-      // Find the class the student belongs to
       final kelas = dummyKelas.firstWhere((k) => k.id == siswa.kelasId);
+      
+      // Determine max semester based on level
+      int maxSemester = 0;
+      if (kelas.tingkat == 'X') maxSemester = 2; // Has data for Sem 1 and 2
+      else if (kelas.tingkat == 'XI') maxSemester = 4; // Has data for Sem 1, 2, 3, 4
+      else if (kelas.tingkat == 'XII') maxSemester = 6; // Has data for Sem 1, 2, 3, 4, 5, 6
 
-      // Assign grades for some of the subjects in their class
-      for (var mapel in kelas.mataPelajaranList) {
-        // Only generate grades for 60% of subjects for a bit of realism
-        // if (random.nextDouble() < 0.6) { // <--- This is the key condition
-          final nilaiTugas = (60 + random.nextInt(40)).toDouble(); // 60-99
-          final nilaiUTS = (60 + random.nextInt(40)).toDouble();
-          final nilaiUAS = (60 + random.nextInt(40)).toDouble();
-          final nilaiKehadiran = (60 + random.nextInt(40)).toDouble();
-          final semester = semesterOptions[random.nextInt(semesterOptions.length)]; // Random semester
+      // Generate grades for ALL previous semesters and current
+      for (int sem = 1; sem <= maxSemester; sem++) {
+        final subjectsForSem = semesterSubjects[sem] ?? [];
+        
+        for (var subjectName in subjectsForSem) {
+          // Find the subject object to check the teacher
+          final mapel = kelas.mataPelajaranList.firstWhere(
+            (m) => m.nama == subjectName,
+            orElse: () => MataPelajaran(id: 'dummy', nama: subjectName, guruNip: '', guruNama: ''),
+          );
+
+          double? nilaiTugas;
+          double? nilaiUTS;
+          double? nilaiUAS;
+          double? nilaiKehadiran;
+
+          // Scenario: Student 2024001 has NOT been graded for the subject taught by 1985... in Semester 3
+          if (siswa.nis == '2024001' && sem == 3 && mapel.guruNip == '198501012010011001') {
+             // Leave as null
+          } else {
+            // Generate grade
+            nilaiTugas = (70 + random.nextInt(30)).toDouble(); // 70-99
+            nilaiUTS = (70 + random.nextInt(30)).toDouble();
+            nilaiUAS = (70 + random.nextInt(30)).toDouble();
+            nilaiKehadiran = (80 + random.nextInt(20)).toDouble(); // Better attendance usually
+          }
 
           dummyNilai.add(Nilai(
             nis: siswa.nis,
             namaSiswa: siswa.nama,
-            mataPelajaran: mapel.nama,
-            semester: semester, // New: Add semester
+            mataPelajaran: subjectName,
+            semester: 'Semester $sem', // Format: "Semester 1"
             nilaiTugas: nilaiTugas,
             nilaiUTS: nilaiUTS,
             nilaiUAS: nilaiUAS,
             nilaiKehadiran: nilaiKehadiran,
           ));
-        // }
+        }
       }
     }
-    await nilaiBox.addAll(dummyNilai);  }
+    await nilaiBox.addAll(dummyNilai);
+  }
 }
