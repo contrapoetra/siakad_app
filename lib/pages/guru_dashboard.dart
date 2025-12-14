@@ -84,8 +84,29 @@ class _GuruDashboardState extends State<GuruDashboard> {
   }
 }
 
-class GuruHomeTab extends StatelessWidget {
+class GuruHomeTab extends StatefulWidget {
   const GuruHomeTab({super.key});
+
+  @override
+  State<GuruHomeTab> createState() => _GuruHomeTabState();
+}
+
+class _GuruHomeTabState extends State<GuruHomeTab> {
+  String _selectedSemester = 'Semester 1';
+  final List<String> _semesterOptions = [
+    'Semester 1', 'Semester 2', 'Semester 3', 
+    'Semester 4', 'Semester 5', 'Semester 6'
+  ];
+
+  String _deriveSemester(String subjectName) {
+    if (subjectName.contains('X-1')) return 'Semester 1';
+    if (subjectName.contains('X-2')) return 'Semester 2';
+    if (subjectName.contains('XI-1')) return 'Semester 3';
+    if (subjectName.contains('XI-2')) return 'Semester 4';
+    if (subjectName.contains('XII-1')) return 'Semester 5';
+    if (subjectName.contains('XII-2')) return 'Semester 6';
+    return 'Semester 1';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +136,12 @@ class GuruHomeTab extends StatelessWidget {
       }
     }
 
+    // Filter by selected semester
+    final filteredSubjects = guruSubjects.where((item) {
+      final mapel = item['mataPelajaran'] as MataPelajaran;
+      return _deriveSemester(mapel.nama) == _selectedSemester;
+    }).toList();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -125,14 +152,35 @@ class GuruHomeTab extends StatelessWidget {
           if (latestPengumuman != null)
             _buildLatestPengumuman(context, latestPengumuman),
           const SizedBox(height: 24),
-          Text(
-            'Kelas yang Anda Ajar',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Kelas yang Anda Ajar',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              DropdownButton<String>(
+                value: _selectedSemester,
+                items: _semesterOptions.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedSemester = newValue;
+                    });
+                  }
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 16),
-          if (guruSubjects.isEmpty)
-             const EmptyState(message: 'Anda belum mengajar kelas apapun.', icon: Icons.class_outlined),
-          ...guruSubjects.map((item) {
+          if (filteredSubjects.isEmpty)
+             const EmptyState(message: 'Tidak ada kelas untuk semester ini.', icon: Icons.class_outlined),
+          ...filteredSubjects.map((item) {
             final kelas = item['kelas'] as Kelas;
             final mapel = item['mataPelajaran'] as MataPelajaran;
             
@@ -140,13 +188,14 @@ class GuruHomeTab extends StatelessWidget {
             final studentsInClass = siswaProvider.siswaList.where((s) => s.kelasId == kelas.id).toList();
             final totalStudents = studentsInClass.length;
             
-            // Count graded students (those who have a Nilai entry for this mapel)
-            // Note: Simplification - checking if ANY grade exists for this mapel/student combo
+            // Count graded students (those who have a Nilai entry for this mapel AND specific semester)
+            // Note: Since mapel is semester-specific, checking by mapel.nama is sufficient.
             int gradedCount = 0;
             for (var student in studentsInClass) {
               final hasGrade = nilaiProvider.nilaiList.any((n) => 
                 n.nis == student.nis && 
-                n.mataPelajaran == mapel.nama
+                n.mataPelajaran == mapel.nama &&
+                n.nilaiAkhir != null // Check if actually graded (not null)
               );
               if (hasGrade) gradedCount++;
             }

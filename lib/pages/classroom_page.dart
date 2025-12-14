@@ -137,11 +137,23 @@ class InputNilaiView extends StatefulWidget {
 }
 
 class _InputNilaiViewState extends State<InputNilaiView> {
-  String _selectedSemester = 'Semester 1';
-  final List<String> _semesterOptions = [
-    'Semester 1', 'Semester 2', 'Semester 3', 
-    'Semester 4', 'Semester 5', 'Semester 6'
-  ];
+  late String _semester;
+
+  @override
+  void initState() {
+    super.initState();
+    _semester = _deriveSemester(widget.mataPelajaran.nama);
+  }
+
+  String _deriveSemester(String subjectName) {
+    if (subjectName.contains('X-1')) return 'Semester 1';
+    if (subjectName.contains('X-2')) return 'Semester 2';
+    if (subjectName.contains('XI-1')) return 'Semester 3';
+    if (subjectName.contains('XI-2')) return 'Semester 4';
+    if (subjectName.contains('XII-1')) return 'Semester 5';
+    if (subjectName.contains('XII-2')) return 'Semester 6';
+    return 'Semester 1'; // Default
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,16 +168,22 @@ class _InputNilaiViewState extends State<InputNilaiView> {
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: DropdownButtonFormField<String>(
-            value: _selectedSemester,
-            decoration: const InputDecoration(
-              labelText: 'Pilih Semester',
-              border: OutlineInputBorder(),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(8),
             ),
-            items: _semesterOptions.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-            onChanged: (value) {
-              if (value != null) setState(() => _selectedSemester = value);
-            },
+            child: Text(
+              'Input Nilai - $_semester',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
         Expanded(
@@ -174,18 +192,15 @@ class _InputNilaiViewState extends State<InputNilaiView> {
             itemBuilder: (context, index) {
               final siswa = studentsInClass[index];
               // Find existing nilai
-              // Note: getNilaiIndex uses (nis, mapelName, semester)
-              // We need to retrieve the actual object.
-              // Since provider only gives index or filtered list, let's use the list.
               final existingNilai = nilaiProvider.nilaiList.firstWhere(
                 (n) => n.nis == siswa.nis && 
                        n.mataPelajaran == widget.mataPelajaran.nama && 
-                       n.semester == _selectedSemester,
+                       n.semester == _semester,
                 orElse: () => Nilai(
                   nis: siswa.nis,
                   namaSiswa: siswa.nama,
                   mataPelajaran: widget.mataPelajaran.nama,
-                  semester: _selectedSemester,
+                  semester: _semester,
                   nilaiTugas: null,
                   nilaiUTS: null,
                   nilaiUAS: null,
@@ -197,7 +212,7 @@ class _InputNilaiViewState extends State<InputNilaiView> {
                 siswa: siswa,
                 initialNilai: existingNilai,
                 mataPelajaran: widget.mataPelajaran,
-                semester: _selectedSemester,
+                semester: _semester,
               );
             },
           ),
