@@ -80,9 +80,14 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       if (success && mounted) {
+        String message = 'Registrasi berhasil! Silakan login.';
+        if (_selectedRole == 'Guru' || _selectedRole == 'Admin') {
+          message = 'Registrasi berhasil, silakan login. Tunggu persetujuan oleh admin untuk role yang diminta';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registrasi berhasil! Silakan login.'),
+          SnackBar(
+            content: Text(message),
             backgroundColor: Colors.green,
           ),
         );
@@ -203,6 +208,29 @@ class _RegisterPageState extends State<RegisterPage> {
                           });
                         },
                       ),
+                      if (_selectedRole == 'Guru' || _selectedRole == 'Admin') ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.amber),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Perhatian: Pendaftaran sebagai $_selectedRole memerlukan persetujuan Admin. Akun Anda akan berstatus sementara hingga disetujui.',
+                                  style: const TextStyle(fontSize: 12, color: Colors.black87),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 32),
                       _isLoading
                           ? const Center(child: CircularProgressIndicator())

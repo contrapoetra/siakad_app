@@ -196,23 +196,25 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
 
               if (_requestedRole != null && _requestStatus == 'pending')
-                Card(
+                Container(
                   margin: const EdgeInsets.symmetric(vertical: 16.0),
-                  color: Colors.blue.shade100,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Permintaan role $_requestedRole Anda sedang menunggu persetujuan admin.',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                          ),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Permintaan role $_requestedRole Anda sedang menunggu persetujuan admin.',
+                          style: const TextStyle(color: Colors.black87),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               if (_requestedRole != null && _requestStatus == 'rejected')

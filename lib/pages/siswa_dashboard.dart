@@ -159,6 +159,28 @@ class _SiswaHomeTabState extends State<SiswaHomeTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (authProvider.currentUserRequestStatus == 'pending')
+             Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Akun Anda sedang menunggu persetujuan Admin untuk menjadi ${authProvider.currentUserRequestedRole}. Saat ini Anda login sebagai Siswa.',
+                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           _buildWelcomeCard(context, currentSiswa?.nama ?? authProvider.currentUsername ?? 'Siswa', siswaKelas?.nama),
           const SizedBox(height: 16),
           if (latestPengumuman != null)
