@@ -229,4 +229,59 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Role Request Method
+  Future<void> requestRole(String newRole) async {
+    if (_currentUser == null) return;
+    final userBox = Hive.box<User>('users');
+    final user = _currentUser!;
+    
+    user.requestedRole = newRole;
+    user.requestStatus = 'pending';
+    
+    // Find and update in Hive
+    final userIndex = userBox.values.toList().indexWhere((u) => u.nomorInduk == user.nomorInduk);
+    if (userIndex != -1) {
+      await userBox.putAt(userIndex, user);
+      
+      _currentUserRequestedRole = newRole;
+      _currentUserRequestStatus = 'pending';
+      notifyListeners();
+    }
+  }
+
+  // Admin Management Methods
+  List<User> getAllAdmins() {
+    final userBox = Hive.box<User>('users');
+    return userBox.values.where((user) => user.role == 'Admin').toList();
+  }
+
+  Future<bool> addAdmin(User newAdmin) async {
+    final userBox = Hive.box<User>('users');
+    // Check if nomorInduk already exists
+    if (userBox.values.any((user) => user.nomorInduk == newAdmin.nomorInduk)) {
+      return false;
+    }
+    await userBox.add(newAdmin);
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> updateAdmin(String originalNomorInduk, User updatedAdmin) async {
+    final userBox = Hive.box<User>('users');
+    final index = userBox.values.toList().indexWhere((u) => u.nomorInduk == originalNomorInduk);
+    if (index != -1) {
+      await userBox.putAt(index, updatedAdmin);
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteAdmin(String nomorInduk) async {
+    final userBox = Hive.box<User>('users');
+    final index = userBox.values.toList().indexWhere((u) => u.nomorInduk == nomorInduk);
+    if (index != -1) {
+      await userBox.deleteAt(index);
+      notifyListeners();
+    }
+  }
 }

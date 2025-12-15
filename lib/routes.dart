@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pages/admin_crud.dart'; // Import AdminCrudPage
 import 'pages/login_page.dart';
 import 'pages/admin_dashboard.dart';
 import 'pages/guru_dashboard.dart';
@@ -23,6 +24,7 @@ class AppRoutes {
   static const String siswaDashboard = '/siswa';
   static const String siswaCrud = '/siswa-crud';
   static const String guruCrud = '/guru-crud';
+  static const String adminCrud = '/admin-crud'; // New route
   static const String kelasCrud = '/kelas-crud';
   static const String jadwalCrud = '/jadwal-crud';
   static const String nilaiInput = '/nilai-input';
@@ -42,6 +44,7 @@ class AppRoutes {
       siswaDashboard: (context) => const SiswaDashboard(),
       siswaCrud: (context) => const SiswaCrudPage(),
       guruCrud: (context) => const GuruCrudPage(),
+      adminCrud: (context) => const AdminCrudPage(), // Map the new page
       kelasCrud: (context) => const KelasCrudPage(),
       jadwalCrud: (context) => const JadwalCrudPage(),
       nilaiInput: (context) => const NilaiInputPage(),

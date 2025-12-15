@@ -158,6 +158,15 @@ class AdminDashboard extends StatelessWidget {
                   ),
                   _buildMenuCard(
                     context,
+                    icon: Icons.admin_panel_settings,
+                    title: 'Manajemen Admin',
+                    color: Theme.of(context).colorScheme.primary,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.adminCrud);
+                    },
+                  ),
+                  _buildMenuCard(
+                    context,
                     icon: Icons.storage,
                     title: 'Generate Data',
                     color: Theme.of(context).colorScheme.error, // Use error color for destructive action

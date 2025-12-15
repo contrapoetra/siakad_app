@@ -282,10 +282,105 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
+
+              // Role Request Button
+              if (_requestedRole == null || _requestStatus != 'pending')
+                 Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.upgrade),
+                      label: const Text('Ajukan Perubahan Role'),
+                      onPressed: _showRoleRequestDialog,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showRoleRequestDialog() {
+    String selectedRole = 'Guru';
+    // If currently Guru, default to Admin. If Siswa, default to Guru.
+    if (_currentRole == 'Guru') selectedRole = 'Admin';
+    if (_currentRole == 'Admin') {
+       selectedRole = 'Guru';
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        String tempSelectedRole = selectedRole;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Ajukan Perubahan Role'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Pilih role yang ingin Anda ajukan:'),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: tempSelectedRole,
+                    items: ['Guru', 'Admin']
+                        .where((role) => role != _currentRole) // Don't show current role
+                        .map((role) => DropdownMenuItem(
+                              value: role,
+                              child: Text(role),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setDialogState(() {
+                          tempSelectedRole = value;
+                        });
+                      }
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Batal'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Use 'this.context' or the captured 'context' from _ProfilePageState
+                    // But 'context' is shadowed by StatefulBuilder's context.
+                    // We can use 'dialogContext' for Provider lookup as well.
+                    final authProvider = Provider.of<AuthProvider>(dialogContext, listen: false);
+                    await authProvider.requestRole(tempSelectedRole);
+                    
+                    if (!dialogContext.mounted) return;
+                    Navigator.pop(dialogContext);
+
+                    // Check if Page is still mounted before updating Page state
+                    if (mounted) {
+                      setState(() { // This is _ProfilePageState's setState
+                        _requestedRole = tempSelectedRole;
+                        _requestStatus = 'pending';
+                      });
+                      ScaffoldMessenger.of(this.context).showSnackBar(
+                        SnackBar(content: Text('Permintaan menjadi $tempSelectedRole berhasil diajukan.')),
+                      );
+                    }
+                  },
+                  child: const Text('Ajukan'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
